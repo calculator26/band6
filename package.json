@@ -1,0 +1,23 @@
+{
+  "name": "lewis-website-",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "check:ui": "node tests/ui-smoke.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calculator26/band6.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/calculator26/band6/issues"
+  },
+  "homepage": "https://github.com/calculator26/band6#readme",
+  "description": "",
+  "devDependencies": {
+    "playwright": "^1.59.1"
+  }
+}
