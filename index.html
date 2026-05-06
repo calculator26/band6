@@ -8,25 +8,27 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --bg:#f5f2eb;--bg2:#ede9e0;--bg3:#e4dfd3;
-  --card:#faf8f4;--card2:#f0ece3;
-  --border:#d8d0c0;--border2:#c8bfa8;
-  --text:#1a1410;--text2:#4a4035;--text3:#7a7060;
-  --gold:#8b6914;--gold2:#b8891a;--gold-bg:#fdf3d8;--gold-border:#e8c96e;
-  --green:#1a6b3a;--green-bg:#eaf7ef;--green-border:#7dd3a8;
-  --blue:#1a4a8b;--blue-bg:#eef4fd;--blue-border:#93c5fd;
-  --red:#8b1a1a;--red-bg:#fdf0f0;--red-border:#fca5a5;
-  --amber:#7a4a08;--amber-bg:#fdf5e6;--amber-border:#fcd34d;
-  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.05);
-  --shadow-md:0 2px 8px rgba(0,0,0,.1),0 8px 32px rgba(0,0,0,.07);
-  --r:14px;
+  --bg:#f4f7fb;--bg2:#e8eef6;--bg3:#d8e2ee;
+  --card:#ffffff;--card2:#f8fbff;
+  --border:#d3deeb;--border2:#b8c7d8;
+  --text:#101820;--text2:#304255;--text3:#647386;
+  --knox-black:#101820;--knox-blue:#003b71;--knox-blue2:#0a5ea8;--knox-sky:#dbeafe;
+  --gold:#b08a2e;--gold2:#d2aa45;--gold-bg:#fff8e6;--gold-border:#ead18a;
+  --green:#157f4f;--green-bg:#edf8f2;--green-border:#8ccfad;
+  --blue:var(--knox-blue);--blue-bg:#eef6ff;--blue-border:#9cc6ed;
+  --red:#a12a2a;--red-bg:#fff1f1;--red-border:#f3a2a2;
+  --amber:#8a5a12;--amber-bg:#fff7e8;--amber-border:#efc969;
+  --shadow:0 1px 2px rgba(16,24,32,.05),0 8px 24px rgba(16,24,32,.06);
+  --shadow-md:0 10px 30px rgba(16,24,32,.12);
+  --r:10px;
 }
 [data-theme="dark"]{
-  --bg:#0e1117;--bg2:#141923;--bg3:#1a2233;
-  --card:#161d2e;--card2:#1e2a40;
-  --border:#2a3650;--border2:#3a4e6a;
-  --text:#e8ecf4;--text2:#a8b4c8;--text3:#6a7a94;
-  --gold:#c9a84c;--gold2:#e8c96e;--gold-bg:#1e1a0e;--gold-border:#6a5418;
+  --bg:#07111d;--bg2:#101c2b;--bg3:#1b2d42;
+  --card:#0d1927;--card2:#122238;
+  --border:#243954;--border2:#365574;
+  --text:#f1f6fb;--text2:#b9c7d6;--text3:#7c8fa3;
+  --knox-black:#02070d;--knox-blue:#2f8fdb;--knox-blue2:#62b0ee;--knox-sky:#122f4c;
+  --gold:#d6b25c;--gold2:#efd386;--gold-bg:#241d0c;--gold-border:#765b18;
   --green:#22c55e;--green-bg:#0a1f14;--green-border:#166534;
   --blue:#60a5fa;--blue-bg:#0a1527;--blue-border:#1d3a6a;
   --red:#f87171;--red-bg:#1a0a0a;--red-border:#7f1d1d;
@@ -36,47 +38,48 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;font-size:14.5px;line-height:1.6;}
+body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card2) 0,var(--bg) 280px);color:var(--text);min-height:100vh;transition:background .3s,color .3s;font-size:14.5px;line-height:1.6;}
 
-.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.topbar{background:var(--knox-black);border-bottom:3px solid var(--knox-blue2);padding:0 18px;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md);}
 .topbar-left{display:flex;align-items:center;gap:11px;}
-.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-.logo-text{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--text);}
-.logo-text span{color:var(--gold);}
+.logo-mark{width:32px;height:32px;background:var(--knox-blue);border:1px solid rgba(255,255,255,.18);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;color:#fff;}
+.logo-text{font-family:'Inter',sans-serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:.2px;}
+.logo-text span{color:#a9d8ff;}
 .topbar-right{display:flex;align-items:center;gap:8px;}
-.theme-btn{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:5px 11px;font-size:12px;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
-.theme-btn:hover{background:var(--bg3);}
-.save-ind{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:5px;}
+.theme-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:7px;padding:5px 11px;font-size:12px;color:#eaf4ff;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
+.theme-btn:hover{background:rgba(255,255,255,.14);}
+.save-ind{font-size:11px;color:#b8c7d8;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:5px;}
 .save-dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
 .save-dot.saving{background:var(--amber);animation:blink .7s infinite;}
 @keyframes blink{50%{opacity:.3;}}
 
 /* YEAR BANNER */
-.year-banner{background:var(--card2);border-bottom:1px solid var(--border);padding:9px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.year-banner{background:var(--card);border-bottom:1px solid var(--border);padding:9px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .year-banner-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
-.year-select{background:var(--card);border:1.5px solid var(--gold-border);border-radius:8px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);cursor:pointer;outline:none;transition:border-color .2s;}
-.year-select:focus{border-color:var(--gold2);}
-.year-pill{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 9px;border-radius:20px;background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border);}
+.year-select{background:var(--card);border:1.5px solid var(--blue-border);border-radius:8px;padding:5px 12px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);cursor:pointer;outline:none;transition:border-color .2s;}
+.year-select:focus{border-color:var(--knox-blue2);}
+.year-pill{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 9px;border-radius:20px;background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border);}
 
 .page{max-width:1000px;margin:0 auto;padding:28px 18px 80px;}
 
-.hero{text-align:center;padding:28px 16px 20px;}
-.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:9px;}
-.hero h1{font-family:'Fraunces',serif;font-size:clamp(24px,4.5vw,42px);font-weight:700;line-height:1.1;margin-bottom:9px;}
-.hero h1 em{font-style:italic;color:var(--gold);}
-.hero p{color:var(--text2);font-size:14.5px;max-width:500px;margin:0 auto 14px;}
-.collab-banner{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:11px;padding:12px 16px;max-width:680px;margin:0 auto;font-size:13px;color:var(--blue);line-height:1.65;text-align:left;}
+.hero{text-align:left;padding:30px 0 18px;max-width:760px;}
+.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:9px;}
+.hero h1{font-family:'Inter',sans-serif;font-size:clamp(28px,4.5vw,48px);font-weight:800;line-height:1.05;margin-bottom:10px;color:var(--knox-black);}
+[data-theme="dark"] .hero h1{color:var(--text);}
+.hero h1 em{font-style:normal;color:var(--knox-blue);}
+.hero p{color:var(--text2);font-size:15px;max-width:570px;margin:0 0 16px;}
+.collab-banner{background:var(--blue-bg);border:1px solid var(--blue-border);border-left:4px solid var(--knox-blue);border-radius:8px;padding:12px 16px;max-width:720px;margin:0;font-size:13px;color:var(--blue);line-height:1.65;text-align:left;}
 .collab-banner a{color:var(--blue);font-weight:600;}
 
-.tabs{display:flex;gap:2px;background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:4px;margin:20px 0 16px;}
+.tabs{display:flex;gap:2px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px;margin:20px 0 16px;box-shadow:var(--shadow);}
 .tab-btn{flex:1;padding:8px 5px;background:transparent;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;}
-.tab-btn.active{background:var(--card);color:var(--text);box-shadow:var(--shadow);}
+.tab-btn.active{background:var(--knox-blue);color:#fff;box-shadow:none;}
 .tab-btn:not(.active):hover{color:var(--text2);}
 .tab-content{display:none;}
 .tab-content.active{display:block;}
 
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-bottom:14px;box-shadow:var(--shadow);}
-.card-title{font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.card-title{font-family:'Inter',sans-serif;font-size:17px;font-weight:750;color:var(--text);margin-bottom:2px;}
 .card-sub{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:.3px;margin-bottom:14px;}
 .sec-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--text3);margin:20px 0 11px;display:flex;align-items:center;gap:10px;}
 .sec-label::after{content:'';flex:1;height:1px;background:var(--border);}
@@ -122,8 +125,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .empty-state{text-align:center;padding:26px 14px;color:var(--text3);font-size:13.5px;}
 .empty-icon{font-size:24px;margin-bottom:6px;display:block;opacity:.4;}
 
-.calc-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),#9a7018);border:none;border-radius:10px;font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .2s,transform .15s,box-shadow .2s;margin-top:4px;}
-.calc-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 5px 18px rgba(139,105,20,.22);}
+.calc-btn{width:100%;padding:14px;background:var(--knox-blue);border:none;border-radius:10px;font-family:'Inter',sans-serif;font-size:16px;font-weight:750;color:#fff;cursor:pointer;transition:opacity .2s,transform .15s,box-shadow .2s;margin-top:4px;}
+.calc-btn:hover{opacity:.94;transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,59,113,.22);}
 .calc-btn:active{transform:translateY(0);}
 
 /* RESULTS */
@@ -134,7 +137,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .res-hdr.cls-mid{background:var(--amber-bg);border:1.5px solid var(--amber-border);}
 .res-hdr.cls-off{background:var(--red-bg);border:1.5px solid var(--red-border);}
 .res-emoji{font-size:36px;margin-bottom:8px;display:block;}
-.res-verdict{font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin-bottom:5px;}
+.res-verdict{font-family:'Inter',sans-serif;font-size:22px;font-weight:800;margin-bottom:5px;}
 .cls-all .res-verdict{color:var(--gold);}
 .cls-on .res-verdict{color:var(--green);}
 .cls-mid .res-verdict{color:var(--amber);}
@@ -144,7 +147,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 /* SUBJECT RESULT CARD */
 .sr-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:18px 20px;margin-bottom:11px;animation:sIn .3s ease both;}
 .sr-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:7px;}
-.sr-name{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--text);}
+.sr-name{font-family:'Inter',sans-serif;font-size:18px;font-weight:750;color:var(--text);}
 .sr-ext-note{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px;}
 .sr-badges{display:flex;gap:5px;flex-wrap:wrap;align-items:flex-start;}
 .sr-badge{padding:3px 9px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.4px;text-transform:uppercase;}
@@ -175,7 +178,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
 @media(max-width:500px){.sum-grid{grid-template-columns:repeat(2,1fr);}}
 .sum-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 9px;text-align:center;}
-.sum-num{font-family:'Fraunces',serif;font-size:28px;font-weight:700;margin-bottom:2px;}
+.sum-num{font-family:'Inter',sans-serif;font-size:28px;font-weight:800;margin-bottom:2px;}
 .sum-lbl{font-size:10px;color:var(--text3);letter-spacing:.3px;text-transform:uppercase;}
 
 .focus-item{padding:12px 0;border-bottom:1px solid var(--border);}
@@ -205,10 +208,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 @media(max-width:520px){.cd-pair{grid-template-columns:1fr;}}
 .cd-widget{background:var(--card);border:1.5px solid var(--border);border-radius:11px;padding:16px 18px;box-shadow:var(--shadow);}
 .cd-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
-.cd-title{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:7px;}
+.cd-title{font-family:'Inter',sans-serif;font-size:15px;font-weight:750;color:var(--text);margin-bottom:7px;}
 .cd-blocks{display:flex;gap:7px;}
 .cd-block{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;text-align:center;min-width:50px;}
-.cd-num{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--text);line-height:1;}
+.cd-num{font-family:'Inter',sans-serif;font-size:22px;font-weight:800;color:var(--text);line-height:1;}
 .cd-unit{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
 .cd-prog-track{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:9px;}
 .cd-prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:3px;transition:width 1s ease;}
@@ -231,7 +234,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
 /* MOTIVATE */
 .quote-card{background:var(--gold-bg);border:1.5px solid var(--gold-border);border-radius:11px;padding:22px;text-align:center;}
-.quote-text{font-family:'Fraunces',serif;font-size:19px;font-style:italic;color:var(--gold);line-height:1.5;margin-bottom:6px;}
+.quote-text{font-family:'Inter',sans-serif;font-size:18px;font-style:normal;font-weight:650;color:var(--blue);line-height:1.5;margin-bottom:6px;}
 .quote-attr{font-size:11.5px;color:var(--text3);font-family:'JetBrains Mono',monospace;}
 .quote-btn{margin-top:12px;padding:7px 16px;background:var(--gold);border:none;border-radius:7px;color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .2s;}
 .quote-btn:hover{opacity:.85;}
@@ -274,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .atar-hero.high{background:var(--gold-bg);border:1.5px solid var(--gold-border);}
 .atar-hero.mid{background:var(--blue-bg);border:1.5px solid var(--blue-border);}
 .atar-hero.low{background:var(--bg2);border:1.5px solid var(--border);}
-.atar-big{font-family:'Fraunces',serif;font-size:64px;font-weight:700;line-height:1;margin:6px 0 4px;}
+.atar-big{font-family:'Inter',sans-serif;font-size:64px;font-weight:850;line-height:1;margin:6px 0 4px;}
 .atar-hero.high .atar-big{color:var(--gold);}
 .atar-hero.mid .atar-big{color:var(--blue);}
 .atar-hero.low .atar-big{color:var(--text2);}
@@ -307,15 +310,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
 .target-atar-section{background:var(--card2);border:1.5px solid var(--border);border-radius:var(--r);padding:20px 22px;margin-top:14px;}
 .target-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
-.target-input{background:var(--card);border:1.5px solid var(--gold-border);border-radius:8px;padding:9px 14px;font-family:'Fraunces',serif;font-size:22px;font-weight:700;width:110px;text-align:center;color:var(--gold);outline:none;transition:border-color .2s;}
-.target-input:focus{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(184,137,26,.09);}
+.target-input{background:var(--card);border:1.5px solid var(--blue-border);border-radius:8px;padding:9px 14px;font-family:'Inter',sans-serif;font-size:22px;font-weight:800;width:110px;text-align:center;color:var(--blue);outline:none;transition:border-color .2s;}
+.target-input:focus{border-color:var(--knox-blue2);box-shadow:0 0 0 3px rgba(10,94,168,.12);}
 .target-result-box{flex:1;min-width:200px;background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:9px;padding:11px 15px;font-size:13px;color:var(--text2);line-height:1.65;}
 .target-result-box strong{color:var(--gold);font-size:16px;}
 
 .how-accordion{border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
 .how-acc-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:var(--card);user-select:none;transition:background .15s;}
 .how-acc-header:hover{background:var(--bg2);}
-.how-acc-title{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--text);}
+.how-acc-title{font-family:'Inter',sans-serif;font-size:15px;font-weight:750;color:var(--text);}
 .how-acc-arrow{font-size:12px;color:var(--text3);transition:transform .25s;}
 .how-acc-arrow.open{transform:rotate(180deg);}
 .how-acc-body{display:none;padding:0 18px 16px;background:var(--card);}
@@ -337,13 +340,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   </div>
   <div class="topbar-right">
     <div class="save-ind"><div class="save-dot" id="saveDot"></div><span id="saveText">All saved</span></div>
-    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">Dark</button>
   </div>
 </div>
 
 <!-- GLOBAL YEAR SELECTOR -->
 <div class="year-banner">
-  <span class="year-banner-label">📊 Showing data for:</span>
+  <span class="year-banner-label">Showing data for</span>
   <select class="year-select" id="globalYear" onchange="onYearChange()">
     <option value="avg" selected>3-Year Average (2023–2025) — Recommended</option>
     <option value="2025">2025 Results</option>
@@ -359,21 +362,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     <h1>HSC <em>Calculator</em> &amp; Insights</h1>
     <p>Enter your internal rank to see if you're on track for Band 5 or 6, using Knox's actual HSC data.</p>
     <div class="collab-banner">
-      🤝 <strong>Class of 2026 — collaborate to elevate.</strong> Use the <strong>WSA (Senior Academy Study Space)</strong> and the <a href="https://knoxnswedu.sharepoint.com/sites/ss-students-year-12/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fss%2Dstudents%2Dyear%2D12%2FShared%20Documents%2FYear%2012%20Shared%20Drive%20Folders&p=true&ga=1" target="_blank">Year 12 Shared OneDrive ↗</a> to pool notes, past papers and resources. The strongest cohorts don't compete against each other — they lift the whole average together.
+      <strong>Class of 2026 — collaborate to elevate.</strong> Use the <strong>WSA (Senior Academy Study Space)</strong> and the <a href="https://knoxnswedu.sharepoint.com/sites/ss-students-year-12/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fss%2Dstudents%2Dyear%2D12%2FShared%20Documents%2FYear%2012%20Shared%20Drive%20Folders&p=true&ga=1" target="_blank">Year 12 Shared OneDrive ↗</a> to pool notes, past papers and resources. The strongest cohorts don't compete against each other — they lift the whole average together.
     </div>
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('calc',this)">📊 Band 6</button>
-    <button class="tab-btn" onclick="switchTab('atar',this)">🎓 ATAR</button>
-    <button class="tab-btn" onclick="switchTab('insights',this)">🔍 Insights</button>
-    <button class="tab-btn" onclick="switchTab('timeline',this)">📅 Timeline</button>
+    <button class="tab-btn active" onclick="switchTab('calc',this)">Band 6</button>
+    <button class="tab-btn" onclick="switchTab('atar',this)">ATAR</button>
+    <button class="tab-btn" onclick="switchTab('insights',this)">Insights</button>
+    <button class="tab-btn" onclick="switchTab('timeline',this)">Timeline</button>
   </div>
 
   <!-- ══ CALCULATOR ══ -->
   <div id="tab-calc" class="tab-content active">
     <div class="notice amber">
-      <span>⚠️</span>
+      <span>Note</span>
       <span><strong>Important disclaimers:</strong> (1) This tool assumes you maintain your current internal rank in both school assessments and the HSC external exam. In reality, rankings shift substantially between now, Trials, and the HSC — some students improve significantly, others drop. (2) Band thresholds are based on Knox's historical cohort — the 2026 cohort will differ. (3) B6 = 90+ scaled mark; B5 = 80+. Your percentile = rank ÷ cohort size.</span>
     </div>
     <div class="card">
@@ -405,26 +408,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     <!-- Merged How It Works + Disclaimers accordion -->
     <div class="how-accordion">
       <div class="how-acc-header" onclick="toggleHowAcc(this)">
-        <span class="how-acc-title">📖 How the ATAR Calculator Works & Disclaimers</span>
+        <span class="how-acc-title">How the ATAR Calculator Works & Disclaimers</span>
         <span class="how-acc-arrow" id="howArrow">▾</span>
       </div>
       <div class="how-acc-body" id="howAccBody">
         <p style="font-size:13px;color:var(--text2);margin-top:12px;line-height:1.7">The HSC ATAR is calculated by NESA using a two-step process. This calculator replicates both steps using Knox's actual data.</p>
         <div class="how-grid">
           <div class="how-box">
-            <div class="how-box-title">1️⃣ Units &amp; Contributions</div>
+            <div class="how-box-title">1. Units &amp; Contributions</div>
             <p>Each subject is worth either <code>2 units</code> or <code>1 unit</code>. Your <strong>KAM</strong> (Knox Assessment Mark, /50) is multiplied by the unit value to get your <strong>contribution</strong>. Extension subjects are 1 unit; most others are 2.</p>
           </div>
           <div class="how-box">
-            <div class="how-box-title">2️⃣ Best 10 Units</div>
+            <div class="how-box-title">2. Best 10 Units</div>
             <p>NESA counts only your <strong>best 10 units</strong>, ranked by <strong>KAM</strong> (your per-unit value), <em>not</em> by total contribution. The best base English course is always counted in full (English is compulsory). For the remaining slots, every other unit competes on its KAM: a 1-unit course at KAM 46 outranks a 2-unit course at KAM 33 because each unit is worth more. If you study 11 units, the lowest-KAM unit is dropped — even if that means partly dropping one half of a 2-unit subject.</p>
           </div>
           <div class="how-box">
-            <div class="how-box-title">3️⃣ Aggregate Score</div>
+            <div class="how-box-title">3. Aggregate Score</div>
             <p>The contributions of your best 10 units are summed to give your <strong>aggregate</strong>, from <code>0</code> to <code>500</code>. Higher aggregate = higher ATAR. The aggregate is simply KAM × units for each subject, totalled.</p>
           </div>
           <div class="how-box">
-            <div class="how-box-title">4️⃣ ATAR Lookup</div>
+            <div class="how-box-title">4. ATAR Lookup</div>
             <p>The aggregate is converted to an ATAR using a state-wide conversion table. An aggregate of <code>400+</code> ≈ ATAR 94+, and <code>450+</code> ≈ ATAR 99+. Lookup covers aggregates 167–479. Results are rounded to nearest <code>0.05</code>.</p>
           </div>
         </div>
@@ -441,7 +444,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
           </div>
         </div>
         <div class="notice amber" style="margin-top:14px;margin-bottom:0">
-          <span>⚠️</span>
+          <span>Note</span>
           <span><strong>Important Disclaimers:</strong> (1) Your <strong>KAM (Knox Assessment Mark)</strong> is an <em>estimate</em> — it reflects your current standing but will change as more tasks are assessed. (2) Your actual HSC mark is moderated against your school assessment rank and the state-wide performance of Knox students. (3) Scaling, moderation, and state-wide cohort variation mean your real ATAR will differ. (4) This is based on averages over multiple years — use for directional planning only, not as a prediction.</span>
         </div>
       </div>
@@ -452,7 +455,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
       <div class="card-title">Your ATAR Subjects <span id="unitCountBadge" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);font-weight:400;margin-left:8px"></span></div>
       <div class="card-sub">Enter your KAM (/50) for each subject · subjects auto-sync from Band 6 tab · best 10 units selected automatically · ATAR estimated once you have 10+ units</div>
       <div class="notice amber" id="atarNotEnoughUnits" style="margin-bottom:11px;display:none">
-        <span>⚠️</span>
+        <span>Note</span>
         <span>Enter KAMs covering at least <strong>10 units</strong> to calculate an ATAR. You currently have <span id="currentUnitCount">0</span> units with KAM entered.</span>
       </div>
       <div class="search-wrap" style="margin-bottom:11px">
@@ -517,12 +520,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
         </div>
       </div>
 
-      <div class="notice blue" style="margin-top:14px"><span>📝</span><span>Based on 2020–2024 NSW aggregate-to-ATAR conversion data. Actual ATAR depends on state-wide scaling, HSC moderation, and cohort variation. Aggregate lookup covers 167–479.</span></div>
+      <div class="notice blue" style="margin-top:14px"><span>Note</span><span>Based on 2020–2024 NSW aggregate-to-ATAR conversion data. Actual ATAR depends on state-wide scaling, HSC moderation, and cohort variation. Aggregate lookup covers 167–479.</span></div>
     </div>
 
     <!-- Goals Section -->
     <div class="card" style="margin-top:14px" id="goalsSection">
-      <div class="card-title">🎯 Goal HSC Marks</div>
+      <div class="card-title">Goal HSC Marks</div>
       <div class="card-sub">Enter your goal HSC mark (/50) for each subject — see the ATAR you'd achieve if you hit those goals</div>
       <div id="goalsSubjectsList">
         <div style="color:var(--text3);font-size:13px;font-style:italic">Subjects will appear here once you add them above.</div>
@@ -538,7 +541,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
     <!-- Target ATAR reverse lookup -->
     <div class="target-atar-section">
-      <div class="card-title">🎯 Target ATAR — What Aggregate Do You Need?</div>
+      <div class="card-title">Target ATAR — What Aggregate Do You Need?</div>
       <div class="card-sub" style="margin-bottom:0">Enter a goal ATAR to see the aggregate required</div>
       <div class="target-row">
         <div>
@@ -555,7 +558,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
   <!-- ══ INSIGHTS ══ -->
   <div id="tab-insights" class="tab-content">
-    <div class="notice blue"><span>💡</span><span>Your subjects with rank, percentile, status and ATAR equivalent — all in one place. Reference table below shows Knox vs State Band 6 rates for every subject. ATAR estimate at the bottom.</span></div>
+    <div class="notice blue"><span>Info</span><span>Your subjects with rank, percentile, status and ATAR equivalent — all in one place. Reference table below shows Knox vs State Band 6 rates for every subject. ATAR estimate at the bottom.</span></div>
 
     <!-- Personal combined table — your subjects, rank, status, ATAR equiv -->
     <div class="card" id="personalCard">
@@ -596,17 +599,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
   <!-- ══ TIMELINE ══ -->
   <div id="tab-timeline" class="tab-content">
-    <div class="notice green"><span>📅</span><span>Official Knox 2026 term dates plus key Year 12 milestones. All dates confirmed from the Knox website and NESA.</span></div>
+    <div class="notice green"><span>Dates</span><span>Official Knox 2026 term dates plus key Year 12 milestones. All dates confirmed from the Knox website and NESA.</span></div>
     <div class="cd-pair">
       <div class="cd-widget">
         <div class="cd-label">Countdown to</div>
-        <div class="cd-title">⚡ Trial Exams</div>
+        <div class="cd-title">Trial Exams</div>
         <div class="cd-blocks" id="cdTrials"></div>
         <div class="cd-prog-track"><div class="cd-prog-fill" id="cdTrialsFill" style="width:0%"></div></div>
       </div>
       <div class="cd-widget">
         <div class="cd-label">Countdown to</div>
-        <div class="cd-title">🎓 HSC Exams</div>
+        <div class="cd-title">HSC Exams</div>
         <div class="cd-blocks" id="cdHsc"></div>
         <div class="cd-prog-track"><div class="cd-prog-fill" id="cdHscFill" style="width:0%"></div></div>
       </div>
@@ -618,7 +621,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     </div>
     <!-- Quote of the Day integrated here -->
     <div class="quote-card" style="margin-top:14px">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">⚡ Quote of the Day</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px">Quote of the Day</div>
       <div class="quote-text" id="quoteText"></div>
       <div class="quote-attr" id="quoteAttr"></div>
       <button class="quote-btn" onclick="nextQuote()">Next Quote →</button>
@@ -860,7 +863,7 @@ function loadPersisted(){
   try{const d=localStorage.getItem('knox26_subj');if(d)addedSubjects=JSON.parse(d);}catch(e){}
   try{
     const t=localStorage.getItem('knox26_theme');
-    if(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('themeBtn').textContent=t==='dark'?'☀️ Light':'🌙 Dark';}
+    if(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('themeBtn').textContent=t==='dark'?'Light':'Dark';}
   }catch(e){}
 }
 
@@ -889,11 +892,11 @@ document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))ddEl.
 function addSubj(s){
   if(addedSubjects.length>=7){alert('Maximum 7 subjects — remove one first.');return;}
   addedSubjects.push({sName:s.name,rank:'',cohort:''});
-  renderSubjList();persist();
+  renderSubjList();persist();syncSharedSubjects();
   ddEl.classList.remove('open');srchEl.value='';
 }
-function removeSubj(i){addedSubjects.splice(i,1);renderSubjList();persist();}
-function updateField(i,f,v){addedSubjects[i][f]=v;persist();updatePersonalInsights();}
+function removeSubj(i){addedSubjects.splice(i,1);renderSubjList();persist();syncSharedSubjects();}
+function updateField(i,f,v){addedSubjects[i][f]=v;persist();syncSharedSubjects({recalculate:false});updatePersonalInsights();}
 
 function renderSubjList(){
   const el=document.getElementById('subjectsList');
@@ -1521,7 +1524,7 @@ function toggleTheme(){
   const html=document.documentElement;
   const dark=html.getAttribute('data-theme')==='dark';
   html.setAttribute('data-theme',dark?'light':'dark');
-  document.getElementById('themeBtn').textContent=dark?'🌙 Dark':'☀️ Light';
+  document.getElementById('themeBtn').textContent=dark?'Dark':'Light';
   try{localStorage.setItem('knox26_theme',dark?'light':'dark');}catch(e){}
 }
 
@@ -1623,7 +1626,7 @@ function loadAtarPersisted(){
 // ATAR TAB OPEN — auto-sync from Band 6
 // ══════════════════════════════════════════
 function onOpenAtarTab(){
-  autoSyncFromBand6();
+  syncSharedSubjects({recalculate:false});
   renderAtarSubjectsList();
   updateTargetLookup();
   autoCalculateATAR();
@@ -1632,24 +1635,43 @@ function onOpenAtarTab(){
 // ══════════════════════════════════════════
 // AUTO SYNC FROM BAND 6 (always, silently)
 // ══════════════════════════════════════════
-function autoSyncFromBand6(){
-  if(!addedSubjects.length) return;
-  // Merge: keep existing KAM values if subject already in atarSubjects
+function isAtarOnlySubject(name){
+  return !SUBJECTS.some(s => s.name === name);
+}
+
+function syncSharedSubjects(opts = {}){
+  const { render = true, recalculate = true } = opts;
   const existingMap = {};
   atarSubjects.forEach(a => { existingMap[a.sName] = a.kam; });
   const existingGoalMap = {};
   atarSubjects.forEach(a => { existingGoalMap[a.sName] = a.goalKam || ''; });
-  const band6Names = new Set(addedSubjects.map(a=>a.sName));
-  const extrasOnly = atarSubjects.filter(a => !band6Names.has(a.sName));
+  const atarOnly = atarSubjects.filter(a => isAtarOnlySubject(a.sName));
   atarSubjects = [
     ...addedSubjects.map(a => ({ sName: a.sName, kam: existingMap[a.sName] !== undefined ? existingMap[a.sName] : '', goalKam: existingGoalMap[a.sName] || '' })),
-    ...extrasOnly.map(a => ({...a, goalKam: a.goalKam||''}))
+    ...atarOnly.map(a => ({...a, goalKam: a.goalKam||''}))
   ];
   persistAtar();
+  if(render) renderAtarSubjectsList();
+  if(recalculate) autoCalculateATAR();
+  updatePersonalInsights();
+}
+
+function migrateAtarSubjectsToBand6(){
+  const existingBandNames = new Set(addedSubjects.map(a => a.sName));
+  atarSubjects.forEach(a => {
+    if(isAtarOnlySubject(a.sName) || existingBandNames.has(a.sName) || addedSubjects.length >= 7) return;
+    addedSubjects.push({sName:a.sName,rank:'',cohort:''});
+    existingBandNames.add(a.sName);
+  });
+  persist();
+}
+
+function autoSyncFromBand6(){
+  syncSharedSubjects();
 }
 
 // Legacy explicit sync button (keep for backward compat)
-function syncFromBand6(){ autoSyncFromBand6(); renderAtarSubjectsList(); autoCalculateATAR(); }
+function syncFromBand6(){ syncSharedSubjects(); }
 
 // ══════════════════════════════════════════
 // ATAR SUBJECT SEARCH
@@ -1696,16 +1718,28 @@ document.addEventListener('click', e=>{
 });
 
 function addAtarSubj(name){
+  if(!isAtarOnlySubject(name) && !addedSubjects.some(a => a.sName === name)){
+    if(addedSubjects.length>=7){alert('Maximum 7 Band 6 subjects — remove one first or add an ATAR-only subject.');return;}
+    addedSubjects.push({sName:name,rank:'',cohort:''});
+    renderSubjList();
+    persist();
+  }
   atarSubjects.push({sName: name, kam: '', goalKam: ''});
-  persistAtar();
+  syncSharedSubjects({render:false,recalculate:false});
   renderAtarSubjectsList();
   atarDdEl.classList.remove('open');
   atarSrchEl.value = '';
   autoCalculateATAR();
 }
 function removeAtarSubj(i){
+  const removed = atarSubjects[i];
   atarSubjects.splice(i,1);
-  persistAtar();
+  if(removed && !isAtarOnlySubject(removed.sName)){
+    addedSubjects = addedSubjects.filter(a => a.sName !== removed.sName);
+    renderSubjList();
+    persist();
+  }
+  syncSharedSubjects({render:false,recalculate:false});
   renderAtarSubjectsList();
   autoCalculateATAR();
 }
@@ -1783,7 +1817,7 @@ function renderAtarSubjectsList(){
       <div>
         <div class="atar-s-name">${rankBadge}${a.sName}</div>
         <div class="atar-s-meta">${units} unit${units!==1?'s':''} · KAM × ${units} = contribution</div>
-        ${rankStr ? `<div class="atar-s-rank">📊 ${rankStr}</div>` : ''}
+        ${rankStr ? `<div class="atar-s-rank">${rankStr}</div>` : ''}
       </div>
       <div class="atar-equiv-box">
         <div class="atar-equiv-label">ATAR Equiv.</div>
@@ -2418,13 +2452,14 @@ function toggleHowAcc(header){
 (function(){
   loadPersisted();
   loadAtarPersisted();
+  migrateAtarSubjectsToBand6();
   renderSubjList();
   renderInsTable();
   renderTimeline();
   showQuote();
   setInterval(renderTimeline,60000);
   // Auto-sync ATAR subjects from Band 6 on load, then try to calculate
-  autoSyncFromBand6();
+  syncSharedSubjects({render:false,recalculate:false});
   renderAtarSubjectsList();
   autoCalculateATAR();
   renderAtarInsightBox();
