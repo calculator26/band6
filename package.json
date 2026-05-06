@@ -1,7 +1,7 @@
 {
   "name": "lewis-website-",
   "version": "1.0.0",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "check:ui": "node tests/ui-smoke.mjs"
   },

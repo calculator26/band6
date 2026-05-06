@@ -895,8 +895,8 @@ function addSubj(s){
   renderSubjList();persist();syncSharedSubjects();
   ddEl.classList.remove('open');srchEl.value='';
 }
-function removeSubj(i){addedSubjects.splice(i,1);renderSubjList();persist();syncSharedSubjects();}
-function updateField(i,f,v){addedSubjects[i][f]=v;persist();syncSharedSubjects({recalculate:false});updatePersonalInsights();}
+function removeSubj(i){addedSubjects.splice(i,1);renderSubjList();persist();syncSharedSubjects({preserveOverflow:false});}
+function updateField(i,f,v){addedSubjects[i][f]=v;persist();syncSharedSubjects({recalculate:false});}
 
 function renderSubjList(){
   const el=document.getElementById('subjectsList');
@@ -1640,16 +1640,26 @@ function isAtarOnlySubject(name){
 }
 
 function syncSharedSubjects(opts = {}){
-  const { render = true, recalculate = true } = opts;
+  const { render = true, recalculate = true, preserveOverflow = true } = opts;
   const existingMap = {};
-  atarSubjects.forEach(a => { existingMap[a.sName] = a.kam; });
-  const existingGoalMap = {};
-  atarSubjects.forEach(a => { existingGoalMap[a.sName] = a.goalKam || ''; });
+  atarSubjects.forEach(a => { existingMap[a.sName] = {...a, goalKam: a.goalKam || ''}; });
+  const addedNames = new Set(addedSubjects.map(a => a.sName));
   const atarOnly = atarSubjects.filter(a => isAtarOnlySubject(a.sName));
+  const overflowShared = preserveOverflow
+    ? atarSubjects.filter(a => !isAtarOnlySubject(a.sName) && !addedNames.has(a.sName))
+    : [];
+  const seen = new Set();
+  const normalize = a => ({...a, goalKam: a.goalKam || ''});
+  const appendUnique = a => {
+    if(seen.has(a.sName)) return null;
+    seen.add(a.sName);
+    return normalize(a);
+  };
   atarSubjects = [
-    ...addedSubjects.map(a => ({ sName: a.sName, kam: existingMap[a.sName] !== undefined ? existingMap[a.sName] : '', goalKam: existingGoalMap[a.sName] || '' })),
-    ...atarOnly.map(a => ({...a, goalKam: a.goalKam||''}))
-  ];
+    ...addedSubjects.map(a => appendUnique(existingMap[a.sName] || { sName: a.sName, kam: '', goalKam: '' })),
+    ...overflowShared.map(appendUnique),
+    ...atarOnly.map(appendUnique)
+  ].filter(Boolean);
   persistAtar();
   if(render) renderAtarSubjectsList();
   if(recalculate) autoCalculateATAR();
