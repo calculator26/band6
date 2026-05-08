@@ -1946,34 +1946,50 @@ function renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, ata
   const el = document.getElementById('atarDistribution');
   if(!el || aggregate === null || aggregateMargin === null || aggregateMargin <= 0) return;
 
-  const bars = 31;
+  const samples = 201;
   const sigma = Math.max(aggregateSigma || 0, 0.35);
-  const center = Math.floor(bars / 2);
-  const points = Array.from({length: bars}, (_, i) => {
-    const t = bars === 1 ? 0 : (i / (bars - 1)) * 2 - 1;
+  const points = Array.from({length: samples}, (_, i) => {
+    const t = samples === 1 ? 0 : (i / (samples - 1)) * 2 - 1;
     const offset = t * aggregateMargin;
     const weight = Math.exp(-0.5 * Math.pow(offset / sigma, 2));
     const sampleAtar = lookupATAR(aggregate + offset).atar;
     return {i, offset, weight, sampleAtar};
   });
-  const maxWeight = Math.max(...points.map(p => p.weight), 1);
   const totalWeight = points.reduce((sum, p) => sum + p.weight, 0) || 1;
   const lowAtar = lookupATAR(Math.max(0, aggregate - aggregateMargin)).atar;
   const highAtar = lookupATAR(Math.min(500, aggregate + aggregateMargin)).atar;
   const pointAtar = atar !== null ? atar : lookupATAR(aggregate).atar;
+  const pointAtarLabel = formatAtarValue(pointAtar);
+
+  const bucketsByAtar = new Map();
+  points.forEach(p => {
+    const label = formatAtarValue(p.sampleAtar);
+    const sortValue = p.sampleAtar === null ? -Infinity : roundATAR(p.sampleAtar);
+    if(!bucketsByAtar.has(label)){
+      bucketsByAtar.set(label, {label, sortValue, weight: 0, minOffset: p.offset, maxOffset: p.offset});
+    }
+    const bucket = bucketsByAtar.get(label);
+    bucket.weight += p.weight;
+    bucket.minOffset = Math.min(bucket.minOffset, p.offset);
+    bucket.maxOffset = Math.max(bucket.maxOffset, p.offset);
+  });
+  const buckets = [...bucketsByAtar.values()].sort((a, b) => a.sortValue - b.sortValue);
+  const maxBucketWeight = Math.max(...buckets.map(b => b.weight), 1);
 
   el.innerHTML = `
     <div class="atar-dist-head">
       <div class="atar-dist-title">Likelihood from KAM rounding</div>
-      <div class="atar-dist-key">Each bar = one aggregate-error slice</div>
+      <div class="atar-dist-key">Each bar = one ATAR outcome</div>
     </div>
     <div class="atar-dist-bars" aria-label="Likely ATAR distribution from rounded KAM uncertainty">
-      ${points.map(p => {
-        const height = Math.max(4, (p.weight / maxWeight) * 56);
-        const offsetLabel = p.offset >= 0 ? `+${p.offset.toFixed(1)}` : p.offset.toFixed(1);
-        const likelihood = (p.weight / totalWeight) * 100;
-        const likelihoodLabel = likelihood >= 1 ? `${likelihood.toFixed(1)}%` : `<1%`;
-        return `<div class="atar-dist-bar ${p.i === center ? 'main' : ''}" tabindex="0" style="height:${height.toFixed(1)}px" title="Approx ATAR ${formatAtarValue(p.sampleAtar)} · aggregate ${offsetLabel} · about ${likelihoodLabel}" data-tip="ATAR ${formatAtarValue(p.sampleAtar)} · agg ${offsetLabel} · about ${likelihoodLabel}"></div>`;
+      ${buckets.map(bucket => {
+        const height = Math.max(4, (bucket.weight / maxBucketWeight) * 56);
+        const minOffset = bucket.minOffset >= 0 ? `+${bucket.minOffset.toFixed(1)}` : bucket.minOffset.toFixed(1);
+        const maxOffset = bucket.maxOffset >= 0 ? `+${bucket.maxOffset.toFixed(1)}` : bucket.maxOffset.toFixed(1);
+        const likelihood = (bucket.weight / totalWeight) * 100;
+        const likelihoodLabel = likelihood >= 1 ? `${likelihood.toFixed(1)}%` : 'less than 1%';
+        const offsetRange = minOffset === maxOffset ? minOffset : `${minOffset} to ${maxOffset}`;
+        return `<div class="atar-dist-bar ${bucket.label === pointAtarLabel ? 'main' : ''}" tabindex="0" style="height:${height.toFixed(1)}px" title="ATAR ${bucket.label} · about ${likelihoodLabel} · aggregate error ${offsetRange}" data-tip="ATAR ${bucket.label} · about ${likelihoodLabel} · agg ${offsetRange}"></div>`;
       }).join('')}
     </div>
     <div class="atar-dist-axis">
@@ -1981,7 +1997,7 @@ function renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, ata
       <span>most likely ${formatAtarValue(pointAtar)}</span>
       <span>${formatAtarValue(highAtar)}</span>
     </div>
-    <div class="atar-dist-note">Bars are not exact 0.05 ATAR buckets. They are small slices of the possible aggregate error from rounded KAMs; taller bars mean more likely outcomes.</div>`;
+    <div class="atar-dist-note">Each bar combines every rounded-KAM scenario that resolves to that exact ATAR. Taller bars mean that ATAR is more likely.</div>`;
 }
 
 function lookupAggForATAR(targetAtar){
