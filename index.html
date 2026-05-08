@@ -300,7 +300,8 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
 .atar-dist-bar:hover::after,.atar-dist-bar:focus::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 7px);transform:translateX(-50%);z-index:5;width:max-content;max-width:150px;background:var(--text);color:var(--card);border-radius:6px;padding:5px 7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;line-height:1.35;white-space:normal;box-shadow:0 6px 18px rgba(15,23,42,.18);}
 .atar-dist-bar:hover::before,.atar-dist-bar:focus::before{content:'';position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--text);z-index:6;}
 .atar-dist-axis{display:flex;justify-content:space-between;gap:8px;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);}
-.atar-dist-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:6px;line-height:1.45;max-width:460px;margin-left:auto;margin-right:auto;}
+.atar-dist-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:7px;line-height:1.5;max-width:500px;margin-left:auto;margin-right:auto;}
+.atar-dist-note strong{color:var(--text2);font-weight:700;}
 @media(max-width:560px){.atar-dist-head{display:block;text-align:center}.atar-dist-key{margin-top:3px}.atar-dist-bar:hover::after,.atar-dist-bar:focus::after{display:none}.atar-dist-bar:hover::before,.atar-dist-bar:focus::before{display:none}}
 .atar-hero.mid .atar-dist-bar{background:linear-gradient(180deg,var(--blue),rgba(10,94,168,.25));}
 .atar-hero.mid .atar-dist-bar.peak{background:linear-gradient(180deg,var(--blue),var(--knox-blue2));box-shadow:0 0 0 1px rgba(10,94,168,.18);}
@@ -2026,7 +2027,9 @@ function renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, ata
       <span>most likely ${peakLabel}${peakLabel!==pointAtarLabel?` · estimate ${pointAtarLabel}`:''}</span>
       <span>${formatAtarValue(highAtar)}</span>
     </div>
-    <div class="atar-dist-note">Each bar combines every rounded-KAM scenario that resolves to that exact ATAR. Tallest filled bar = most likely; outlined bar = point estimate.</div>`;
+    <div class="atar-dist-note">
+      <strong>Why the peak can differ from the estimate:</strong> each bar combines all rounded-KAM scenarios that resolve to that exact ATAR. The aggregate-to-ATAR curve is uneven, so nearby ATAR outcomes can cover slightly wider aggregate ranges than the point estimate. Tallest filled bar = most likely bucket; outlined bar = point estimate.
+    </div>`;
 }
 
 function lookupAggForATAR(targetAtar){
