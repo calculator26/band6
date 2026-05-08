@@ -45,6 +45,15 @@ try {
   if(mathUnits.advanced !== 0 || mathUnits.ext1 !== 2 || mathUnits.ext2 !== 2){
     throw new Error(`Expected Advanced/Ext1/Ext2 maths units to be 0/2/2, got ${mathUnits.advanced}/${mathUnits.ext1}/${mathUnits.ext2}`);
   }
+  const kamRounding = await page.evaluate(() => ({
+    rounded: parseKamValue('42.5'),
+    low: getKamRange(43).low,
+    high: getKamRange(43).high,
+    inputStep: document.querySelector('.kam-input')?.getAttribute('step')
+  }));
+  if(kamRounding.rounded !== 43 || kamRounding.low !== 42.5 || kamRounding.high !== 43.5 || kamRounding.inputStep !== '1'){
+    throw new Error(`Expected rounded integer KAM with +/-0.5 range, got ${JSON.stringify(kamRounding)}`);
+  }
 
   await page.evaluate(() => {
     localStorage.setItem('knox26_subjects', JSON.stringify([
