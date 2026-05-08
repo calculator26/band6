@@ -286,6 +286,16 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
 .atar-hero.high .atar-agg-display{color:var(--gold);}
 .atar-hero.mid .atar-agg-display{color:var(--blue);}
 .atar-hero.low .atar-agg-display{color:var(--text2);}
+.atar-dist{max-width:520px;margin:14px auto 0;padding-top:12px;border-top:1px solid rgba(120,110,90,.18);}
+.atar-dist-bars{height:58px;display:flex;align-items:flex-end;gap:3px;padding:0 6px;}
+.atar-dist-bar{flex:1;min-width:3px;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--gold),rgba(184,140,34,.28));opacity:.42;}
+.atar-dist-bar.main{opacity:1;background:linear-gradient(180deg,var(--gold),var(--gold2));box-shadow:0 0 0 1px rgba(184,140,34,.18);}
+.atar-dist-axis{display:flex;justify-content:space-between;gap:8px;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);}
+.atar-dist-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:6px;line-height:1.45;}
+.atar-hero.mid .atar-dist-bar{background:linear-gradient(180deg,var(--blue),rgba(10,94,168,.25));}
+.atar-hero.mid .atar-dist-bar.main{background:linear-gradient(180deg,var(--blue),var(--knox-blue2));box-shadow:0 0 0 1px rgba(10,94,168,.18);}
+.atar-hero.low .atar-dist-bar{background:linear-gradient(180deg,var(--text2),rgba(100,116,139,.22));}
+.atar-hero.low .atar-dist-bar.main{background:linear-gradient(180deg,var(--text),var(--text2));}
 
 .working-table{width:100%;border-collapse:collapse;font-size:13px;}
 .working-table th{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);padding:8px 10px;text-align:left;border-bottom:1.5px solid var(--border);background:var(--bg2);}
@@ -473,6 +483,7 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
         <div class="atar-sub-label">Estimated ATAR</div>
         <div class="atar-big" id="atarBig">—</div>
         <div class="atar-agg-display" id="atarAggDisplay">Aggregate: —</div>
+        <div id="atarDistribution" class="atar-dist"></div>
       </div>
 
       <div class="atar-summary-grid" id="atarSummaryGrid"></div>
@@ -1915,6 +1926,48 @@ function formatSubjectAtarRange(kam){
   return `${formatAtarValue(low)}-${formatAtarValue(high)}`;
 }
 
+function estimateRoundingSigma(subjectRows){
+  const variance = subjectRows.reduce((sum, s) => {
+    const units = s.units || 0;
+    return sum + (units * units) / 12;
+  }, 0);
+  return Math.sqrt(variance);
+}
+
+function renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, atar}){
+  const el = document.getElementById('atarDistribution');
+  if(!el || aggregate === null || aggregateMargin === null || aggregateMargin <= 0) return;
+
+  const bars = 31;
+  const sigma = Math.max(aggregateSigma || 0, 0.35);
+  const center = Math.floor(bars / 2);
+  const points = Array.from({length: bars}, (_, i) => {
+    const t = bars === 1 ? 0 : (i / (bars - 1)) * 2 - 1;
+    const offset = t * aggregateMargin;
+    const weight = Math.exp(-0.5 * Math.pow(offset / sigma, 2));
+    const sampleAtar = lookupATAR(aggregate + offset).atar;
+    return {i, offset, weight, sampleAtar};
+  });
+  const maxWeight = Math.max(...points.map(p => p.weight), 1);
+  const lowAtar = lookupATAR(Math.max(0, aggregate - aggregateMargin)).atar;
+  const highAtar = lookupATAR(Math.min(500, aggregate + aggregateMargin)).atar;
+  const pointAtar = atar !== null ? atar : lookupATAR(aggregate).atar;
+
+  el.innerHTML = `
+    <div class="atar-dist-bars" aria-label="Likely ATAR distribution from rounded KAM uncertainty">
+      ${points.map(p => {
+        const height = Math.max(4, (p.weight / maxWeight) * 56);
+        return `<div class="atar-dist-bar ${p.i === center ? 'main' : ''}" style="height:${height.toFixed(1)}px" title="ATAR ${formatAtarValue(p.sampleAtar)}"></div>`;
+      }).join('')}
+    </div>
+    <div class="atar-dist-axis">
+      <span>${formatAtarValue(lowAtar)}</span>
+      <span>most likely ${formatAtarValue(pointAtar)}</span>
+      <span>${formatAtarValue(highAtar)}</span>
+    </div>
+    <div class="atar-dist-note">Rounded KAM errors are more likely to cancel out than all lean the same way, so the centre is the most likely outcome.</div>`;
+}
+
 function lookupAggForATAR(targetAtar){
   // Find the minimum aggregate that gives an ATAR >= targetAtar
   const entries = Object.entries(ATAR_LOOKUP).map(([k,v])=>({agg:parseInt(k),atar:v})).sort((a,b)=>a.agg-b.agg);
@@ -2274,9 +2327,10 @@ function calculateATAR(){
 
   const aggregate = counted.reduce((sum, s) => sum + s.contribution, 0);
   const aggregateMargin = counted.reduce((sum, s) => sum + (s.units || 0) * KAM_ROUNDING_MARGIN, 0);
+  const aggregateSigma = estimateRoundingSigma(counted);
   const { atar, note } = lookupATAR(aggregate);
 
-  renderATARResults({subjData, counted, dropped, noKam, aggregate, aggregateMargin, atar, note, unitsUsed});
+  renderATARResults({subjData, counted, dropped, noKam, aggregate, aggregateMargin, aggregateSigma, atar, note, unitsUsed});
   document.getElementById('atarResults').style.display = 'block';
   // Update insights tab with ATAR data
   updateInsightsWithATAR(aggregate, atar ? roundATAR(atar) : null, unitsUsed, aggregateMargin);
@@ -2386,7 +2440,7 @@ function pickBestTenUnits(withContrib){
   return { counted, dropped, unitsUsed };
 }
 
-function renderATARResults({subjData, counted, dropped, noKam, aggregate, aggregateMargin, atar, note, unitsUsed}){
+function renderATARResults({subjData, counted, dropped, noKam, aggregate, aggregateMargin, aggregateSigma, atar, note, unitsUsed}){
   // Hero
   const hero = document.getElementById('atarHero');
   const bigEl = document.getElementById('atarBig');
@@ -2397,6 +2451,7 @@ function renderATARResults({subjData, counted, dropped, noKam, aggregate, aggreg
   bigEl.textContent = atarStr;
   aggEl.textContent = `Aggregate: ${aggregate.toFixed(1)} +/- ${aggregateMargin.toFixed(1)} / 500 · ATAR range ${atarRangeStr}`;
   hero.className = 'atar-hero ' + (atarRounded !== null && atarRounded>=90?'high': atarRounded !== null && atarRounded>=70?'mid':'low');
+  renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, atar});
 
   // Summary cards
   document.getElementById('atarSummaryGrid').innerHTML = `

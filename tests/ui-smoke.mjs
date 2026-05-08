@@ -54,7 +54,6 @@ try {
   if(kamRounding.rounded !== 43 || kamRounding.low !== 42.5 || kamRounding.high !== 43.5 || kamRounding.inputStep !== '1'){
     throw new Error(`Expected rounded integer KAM with +/-0.5 range, got ${JSON.stringify(kamRounding)}`);
   }
-
   await page.evaluate(() => {
     localStorage.setItem('knox26_subjects', JSON.stringify([
       {sName:'Ancient History',rank:'',cohort:''},
@@ -85,6 +84,17 @@ try {
   });
   if(preservedLegal?.kam !== '99' || preservedLegal?.goalKam !== '98'){
     throw new Error('Expected overflow ATAR subject and KAM values to be preserved');
+  }
+  const distributionRendered = await page.evaluate(() => {
+    const el = document.querySelector('#atarDistribution');
+    return {
+      exists: !!el,
+      barCount: el ? el.querySelectorAll('.atar-dist-bar').length : 0,
+      text: el ? el.textContent : ''
+    };
+  });
+  if(!distributionRendered.exists || distributionRendered.barCount < 20 || !distributionRendered.text.includes('most likely')){
+    throw new Error(`Expected ATAR distribution graph to render, got ${JSON.stringify(distributionRendered)}`);
   }
   await page.waitForTimeout(500);
 
