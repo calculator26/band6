@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Knox Grammar · 2026 HSC Calculator</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -1956,6 +1957,7 @@ function renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, ata
     return {i, offset, weight, sampleAtar};
   });
   const maxWeight = Math.max(...points.map(p => p.weight), 1);
+  const totalWeight = points.reduce((sum, p) => sum + p.weight, 0) || 1;
   const lowAtar = lookupATAR(Math.max(0, aggregate - aggregateMargin)).atar;
   const highAtar = lookupATAR(Math.min(500, aggregate + aggregateMargin)).atar;
   const pointAtar = atar !== null ? atar : lookupATAR(aggregate).atar;
@@ -1969,8 +1971,9 @@ function renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, ata
       ${points.map(p => {
         const height = Math.max(4, (p.weight / maxWeight) * 56);
         const offsetLabel = p.offset >= 0 ? `+${p.offset.toFixed(1)}` : p.offset.toFixed(1);
-        const likelihood = Math.round((p.weight / maxWeight) * 100);
-        return `<div class="atar-dist-bar ${p.i === center ? 'main' : ''}" tabindex="0" style="height:${height.toFixed(1)}px" title="Approx ATAR ${formatAtarValue(p.sampleAtar)} · aggregate ${offsetLabel}" data-tip="ATAR ${formatAtarValue(p.sampleAtar)} · agg ${offsetLabel} · ${likelihood}% rel. likelihood"></div>`;
+        const likelihood = (p.weight / totalWeight) * 100;
+        const likelihoodLabel = likelihood >= 1 ? `${likelihood.toFixed(1)}%` : `<1%`;
+        return `<div class="atar-dist-bar ${p.i === center ? 'main' : ''}" tabindex="0" style="height:${height.toFixed(1)}px" title="Approx ATAR ${formatAtarValue(p.sampleAtar)} · aggregate ${offsetLabel} · about ${likelihoodLabel}" data-tip="ATAR ${formatAtarValue(p.sampleAtar)} · agg ${offsetLabel} · about ${likelihoodLabel}"></div>`;
       }).join('')}
     </div>
     <div class="atar-dist-axis">

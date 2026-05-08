@@ -87,14 +87,23 @@ try {
   }
   const distributionRendered = await page.evaluate(() => {
     const el = document.querySelector('#atarDistribution');
+    const middleTip = el?.querySelector('.atar-dist-bar.main')?.getAttribute('data-tip') || '';
     return {
       exists: !!el,
       barCount: el ? el.querySelectorAll('.atar-dist-bar').length : 0,
-      text: el ? el.textContent : ''
+      text: el ? el.textContent : '',
+      middleTip,
+      favicon: document.querySelector('link[rel="icon"]')?.getAttribute('href') || ''
     };
   });
   if(!distributionRendered.exists || distributionRendered.barCount < 20 || !distributionRendered.text.includes('most likely')){
     throw new Error(`Expected ATAR distribution graph to render, got ${JSON.stringify(distributionRendered)}`);
+  }
+  if(!distributionRendered.middleTip.includes('about') || distributionRendered.middleTip.includes('rel. likelihood')){
+    throw new Error(`Expected absolute likelihood tooltip, got ${distributionRendered.middleTip}`);
+  }
+  if(!distributionRendered.favicon.includes('data:image/svg+xml')){
+    throw new Error(`Expected inline emoji favicon, got ${distributionRendered.favicon}`);
   }
   await page.waitForTimeout(500);
 
