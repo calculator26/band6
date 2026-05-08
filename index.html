@@ -1898,6 +1898,19 @@ function lookupATAR(agg){
   return {atar: ATAR_LOOKUP[rounded] || null, note: ''};
 }
 
+function lookupATARInterpolated(agg){
+  if(agg < 167) return {atar: null, note: 'Below minimum aggregate (167) in lookup table'};
+  if(agg > 479) return {atar: 99.95, note: ''};
+  const lo = Math.floor(agg);
+  const hi = Math.ceil(agg);
+  const loAtar = ATAR_LOOKUP[lo];
+  const hiAtar = ATAR_LOOKUP[hi];
+  if(loAtar === undefined || hiAtar === undefined) return lookupATAR(agg);
+  if(lo === hi) return {atar: loAtar, note: ''};
+  const t = agg - lo;
+  return {atar: loAtar + (hiAtar - loAtar) * t, note: ''};
+}
+
 const KAM_ROUNDING_MARGIN = 0.5;
 
 function parseKamValue(value){
@@ -1917,6 +1930,10 @@ function getKamRange(kam){
 
 function formatAtarValue(atar){
   return atar !== null ? roundATAR(atar).toFixed(2) : '< 50';
+}
+
+function formatAtarOutcome(agg){
+  return formatAtarValue(lookupATARInterpolated(agg).atar);
 }
 
 function formatAtarRangeFromAggregate(aggregate, margin){
@@ -1952,18 +1969,20 @@ function renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, ata
     const t = samples === 1 ? 0 : (i / (samples - 1)) * 2 - 1;
     const offset = t * aggregateMargin;
     const weight = Math.exp(-0.5 * Math.pow(offset / sigma, 2));
-    const sampleAtar = lookupATAR(aggregate + offset).atar;
-    return {i, offset, weight, sampleAtar};
+    const sampleAgg = aggregate + offset;
+    const sampleAtar = lookupATARInterpolated(sampleAgg).atar;
+    const sampleAtarLabel = formatAtarValue(sampleAtar);
+    return {i, offset, weight, sampleAgg, sampleAtar, sampleAtarLabel};
   });
   const totalWeight = points.reduce((sum, p) => sum + p.weight, 0) || 1;
-  const lowAtar = lookupATAR(Math.max(0, aggregate - aggregateMargin)).atar;
-  const highAtar = lookupATAR(Math.min(500, aggregate + aggregateMargin)).atar;
-  const pointAtar = atar !== null ? atar : lookupATAR(aggregate).atar;
+  const lowAtar = lookupATARInterpolated(Math.max(0, aggregate - aggregateMargin)).atar;
+  const highAtar = lookupATARInterpolated(Math.min(500, aggregate + aggregateMargin)).atar;
+  const pointAtar = atar !== null ? atar : lookupATARInterpolated(aggregate).atar;
   const pointAtarLabel = formatAtarValue(pointAtar);
 
   const bucketsByAtar = new Map();
   points.forEach(p => {
-    const label = formatAtarValue(p.sampleAtar);
+    const label = p.sampleAtarLabel;
     const sortValue = p.sampleAtar === null ? -Infinity : roundATAR(p.sampleAtar);
     if(!bucketsByAtar.has(label)){
       bucketsByAtar.set(label, {label, sortValue, weight: 0, minOffset: p.offset, maxOffset: p.offset});

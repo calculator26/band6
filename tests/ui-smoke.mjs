@@ -95,12 +95,14 @@ try {
     const el = document.querySelector('#atarDistribution');
     const middleTip = el?.querySelector('.atar-dist-bar.main')?.getAttribute('data-tip') || '';
     const tips = [...(el?.querySelectorAll('.atar-dist-bar') || [])].map(bar => bar.getAttribute('data-tip'));
+    const labels = tips.map(tip => tip?.match(/^ATAR ([^ ]+)/)?.[1]).filter(Boolean);
     return {
       exists: !!el,
       barCount: el ? el.querySelectorAll('.atar-dist-bar').length : 0,
       text: el ? el.textContent : '',
       middleTip,
       tips,
+      labels,
       favicon: document.querySelector('link[rel="icon"]')?.getAttribute('href') || ''
     };
   });
@@ -112,6 +114,19 @@ try {
   }
   if(!distributionRendered.tips.every(tip => tip && tip.startsWith('ATAR '))){
     throw new Error(`Expected ATAR-outcome tooltips, got ${JSON.stringify(distributionRendered.tips)}`);
+  }
+  const labelNums = distributionRendered.labels.map(Number);
+  const hasNonAtarStep = labelNums.slice(1).some((v, i) => Math.round((v - labelNums[i]) * 100) % 5 !== 0);
+  if(hasNonAtarStep){
+    throw new Error(`Expected distribution labels to follow 0.05 ATAR increments, got ${distributionRendered.labels.join(', ')}`);
+  }
+  const centeredIdx = distributionRendered.labels.indexOf('94.45');
+  if(centeredIdx !== -1){
+    const left = distributionRendered.labels[centeredIdx - 1];
+    const right = distributionRendered.labels[centeredIdx + 1];
+    if(left !== '94.40' || right !== '94.50'){
+      throw new Error(`Expected neighboring ATAR outcomes around 94.45 to be 94.40/94.50, got ${left}/${right}`);
+    }
   }
   if(!distributionRendered.favicon.includes('data:image/svg+xml')){
     throw new Error(`Expected inline emoji favicon, got ${distributionRendered.favicon}`);
