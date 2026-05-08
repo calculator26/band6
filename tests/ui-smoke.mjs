@@ -31,6 +31,21 @@ try {
   await page.getByRole('button', { name: 'ATAR' }).click();
   await page.locator('#atarSubjectsList').getByText('Mathematics Advanced').waitFor();
 
+  await page.locator('#atarSearch').fill('Mathematics Extension 2');
+  await page.locator('#atarDropdown .dd-item').first().click();
+  await page.locator('#atarSubjectsList').getByText('Mathematics Extension 2').waitFor();
+  await page.locator('#atarSearch').fill('Mathematics Extension 1');
+  await page.locator('#atarDropdown .dd-item').first().click();
+  await page.locator('#atarSubjectsList').getByText('Mathematics Extension 1').waitFor();
+  const mathUnits = await page.evaluate(() => ({
+    advanced: getSubjectUnits('Mathematics Advanced'),
+    ext1: getSubjectUnits('Mathematics Extension 1'),
+    ext2: getSubjectUnits('Mathematics Extension 2')
+  }));
+  if(mathUnits.advanced !== 0 || mathUnits.ext1 !== 2 || mathUnits.ext2 !== 2){
+    throw new Error(`Expected Advanced/Ext1/Ext2 maths units to be 0/2/2, got ${mathUnits.advanced}/${mathUnits.ext1}/${mathUnits.ext2}`);
+  }
+
   await page.evaluate(() => {
     localStorage.setItem('knox26_subjects', JSON.stringify([
       {sName:'Ancient History',rank:'',cohort:''},

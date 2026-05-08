@@ -1187,7 +1187,7 @@ function updatePersonalInsights(){
     const b6L = r.s.isExt ? 'E4' : 'B6';
     const b5L = r.s.isExt ? 'E3' : 'B5';
     // ATAR equivalent and contribution from the ATAR-tab KAM
-    let atarEq = null, kam = null, contribution = null, units = getSubjectUnits(r.s.name);
+    let atarEq = null, kam = null, contribution = null, units = getSubjectUnits(r.s.name, atarSubjects);
     const atarEntry = (typeof atarSubjects !== 'undefined') ? atarSubjects.find(x => x.sName === r.s.name) : null;
     if(atarEntry && atarEntry.kam !== '' && atarEntry.kam !== undefined){
       const k = parseFloat(atarEntry.kam);
@@ -1594,11 +1594,23 @@ const ATAR_LOOKUP = {167:49.96,168:50.17,169:50.38,170:50.6,171:50.81,172:51.02,
 const ONE_UNIT_SUBJECTS = new Set([
   'Chinese Extension','English Extension 1','English Extension 2',
   'French Extension','German Extension','History Extension',
-  'Japanese Extension','Mathematics Extension 1',
+  'Japanese Extension',
   'Music Extension','Science Extension','Studies of Religion I'
 ]);
 
-function getSubjectUnits(name){
+function getSubjectNameSet(subjectList = null){
+  const source = subjectList || (typeof atarSubjects !== 'undefined' ? atarSubjects : []);
+  if(source instanceof Set) return source;
+  return new Set(source.map(s => typeof s === 'string' ? s : (s.sName || s.name)).filter(Boolean));
+}
+
+function getSubjectUnits(name, subjectList = null){
+  const names = getSubjectNameSet(subjectList);
+  const hasMathExt2 = names.has('Mathematics Extension 2');
+
+  if(name === 'Mathematics Extension 2') return 2;
+  if(name === 'Mathematics Extension 1') return hasMathExt2 ? 2 : 1;
+  if(name === 'Mathematics Advanced' && hasMathExt2) return 0;
   if(ONE_UNIT_SUBJECTS.has(name)) return 1;
   return 2;
 }
@@ -1713,7 +1725,7 @@ atarSrchEl.addEventListener('input', ()=>{
   else{
     matches.slice(0,10).forEach(s=>{
       const el = document.createElement('div'); el.className='dd-item';
-      const units = getSubjectUnits(s.name);
+      const units = getSubjectUnits(s.name, [...atarSubjects.map(a => a.sName), s.name]);
       const atarOnly = !SUBJECTS.find(x => x.name === s.name);
       const atarOnlyBadge = atarOnly ? '<span class="dd-b" style="background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border);font-size:9px">ATAR only</span>' : '';
       el.innerHTML = `<div><div class="dd-sub">${s.name}</div><div class="dd-meta">${units} unit${units!==1?'s':''}${atarOnly?' · no Band 6 data':''}</div></div><div class="dd-badges"><span class="dd-b b6b">${units}u</span>${atarOnlyBadge}</div>`;
@@ -1757,7 +1769,6 @@ function updateAtarKam(i, v){
   atarSubjects[i].kam = v;
   persistAtar();
   // Update ATAR equiv for this row instantly
-  const units = getSubjectUnits(atarSubjects[i].sName);
   const kam = v !== '' ? parseFloat(v) : null;
   const equivEl = document.getElementById('atarEquiv'+i);
   if(equivEl){
@@ -1790,7 +1801,7 @@ function renderAtarSubjectsList(){
   // valuable unit than a 2-unit subject at KAM 33, even though the latter has higher total contribution.
   const ordered = atarSubjects
     .map((a, origIdx) => {
-      const units = getSubjectUnits(a.sName);
+      const units = getSubjectUnits(a.sName, atarSubjects);
       const kamN = a.kam !== '' ? parseFloat(a.kam) : null;
       return { a, origIdx, units, kamN };
     })
@@ -1826,7 +1837,7 @@ function renderAtarSubjectsList(){
     return `<div class="atar-subj-row" id="atarRow${i}">
       <div>
         <div class="atar-s-name">${rankBadge}${a.sName}</div>
-        <div class="atar-s-meta">${units} unit${units!==1?'s':''} · KAM × ${units} = contribution</div>
+        <div class="atar-s-meta">${units ? `${units} unit${units!==1?'s':''} · KAM × ${units} = contribution` : 'Not included when Maths Extension 2 is studied'}</div>
         ${rankStr ? `<div class="atar-s-rank">${rankStr}</div>` : ''}
       </div>
       <div class="atar-equiv-box">
@@ -1875,7 +1886,7 @@ function lookupAggForATAR(targetAtar){
 // ══════════════════════════════════════════
 function updateUnitCountBadge(){
   const withKam = atarSubjects.filter(a => a.kam !== '' && !isNaN(parseFloat(a.kam)));
-  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName), 0);
+  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName, withKam), 0);
   const badge = document.getElementById('unitCountBadge');
   if(badge) badge.textContent = `(${unitsWithKam} units entered)`;
   const notice = document.getElementById('atarNotEnoughUnits');
@@ -1891,7 +1902,7 @@ function updateUnitCountBadge(){
 // ══════════════════════════════════════════
 function autoCalculateATAR(){
   const withKam = atarSubjects.filter(a => a.kam !== '' && !isNaN(parseFloat(a.kam)));
-  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName), 0);
+  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName, withKam), 0);
   if(unitsWithKam < 10){
     // Hide results if not enough units
     document.getElementById('atarResults').style.display = 'none';
@@ -1955,7 +1966,7 @@ function updateGoalsSection(){
   }
   goalsEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:9px;margin-bottom:10px">` +
     atarSubjects.map((a, i) => {
-      const units = getSubjectUnits(a.sName);
+      const units = getSubjectUnits(a.sName, atarSubjects);
       // Compute ATAR equivalent for goal KAM (KAM × 10 as if 10-unit aggregate)
       const goalKam = a.goalKam !== '' ? parseFloat(a.goalKam) : null;
       let goalAtarStr = '—';
@@ -1992,13 +2003,13 @@ function updateGoalsSection(){
 
 function computeGoalATAR(){
   const withGoal = atarSubjects.filter(a => a.goalKam !== '' && !isNaN(parseFloat(a.goalKam)));
-  const unitsWithGoal = withGoal.reduce((s,a)=>s+getSubjectUnits(a.sName), 0);
+  const unitsWithGoal = withGoal.reduce((s,a)=>s+getSubjectUnits(a.sName, withGoal), 0);
   const resultEl = document.getElementById('goalsResult');
   if(unitsWithGoal < 10){ resultEl.style.display = 'none'; return; }
 
   // Same algorithm as calculateATAR but using goalKam
   const subjData = atarSubjects.map(a => {
-    const units = getSubjectUnits(a.sName);
+    const units = getSubjectUnits(a.sName, withGoal);
     const kam = a.goalKam !== '' ? Math.max(0, Math.min(50, parseFloat(a.goalKam))) : null;
     const contribution = kam !== null ? kam * units : null;
     return {sName: a.sName, units, kam, contribution};
@@ -2199,12 +2210,12 @@ function setChartZoom(atarFloor, btn){
 function calculateATAR(){
   // Validate
   const withKam = atarSubjects.filter(a => a.kam !== '' && !isNaN(parseFloat(a.kam)));
-  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName), 0);
+  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName, withKam), 0);
   if(unitsWithKam < 10){ document.getElementById('atarResults').style.display = 'none'; return; }
 
   // Build subject data with contributions
   const subjData = atarSubjects.map(a => {
-    const units = getSubjectUnits(a.sName);
+    const units = getSubjectUnits(a.sName, withKam);
     const kam = a.kam !== '' ? Math.max(0, Math.min(50, parseFloat(a.kam))) : null;
     const contribution = kam !== null ? kam * units : null;
     return {sName: a.sName, units, kam, contribution};
