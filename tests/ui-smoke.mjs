@@ -93,14 +93,16 @@ try {
       atar: lookupATAR(400).atar
     });
     const el = document.querySelector('#atarDistribution');
-    const middleTip = el?.querySelector('.atar-dist-bar.main')?.getAttribute('data-tip') || '';
+    const peakTip = el?.querySelector('.atar-dist-bar.peak')?.getAttribute('data-tip') || '';
+    const estimateTip = el?.querySelector('.atar-dist-bar.estimate')?.getAttribute('data-tip') || '';
     const tips = [...(el?.querySelectorAll('.atar-dist-bar') || [])].map(bar => bar.getAttribute('data-tip'));
     const labels = tips.map(tip => tip?.match(/^ATAR ([^ ]+)/)?.[1]).filter(Boolean);
     return {
       exists: !!el,
       barCount: el ? el.querySelectorAll('.atar-dist-bar').length : 0,
       text: el ? el.textContent : '',
-      middleTip,
+      peakTip,
+      estimateTip,
       tips,
       labels,
       favicon: document.querySelector('link[rel="icon"]')?.getAttribute('href') || ''
@@ -109,8 +111,14 @@ try {
   if(!distributionRendered.exists || distributionRendered.barCount < 3 || !distributionRendered.text.includes('Each bar = one ATAR outcome')){
     throw new Error(`Expected ATAR distribution graph to render, got ${JSON.stringify(distributionRendered)}`);
   }
-  if(!distributionRendered.middleTip.includes('about') || distributionRendered.middleTip.includes('rel. likelihood')){
-    throw new Error(`Expected absolute likelihood tooltip, got ${distributionRendered.middleTip}`);
+  if(!distributionRendered.peakTip.includes('about') || distributionRendered.peakTip.includes('rel. likelihood')){
+    throw new Error(`Expected absolute likelihood tooltip, got ${distributionRendered.peakTip}`);
+  }
+  if(!distributionRendered.estimateTip.includes('ATAR 94.45')){
+    throw new Error(`Expected point estimate bar to be outlined at 94.45, got ${distributionRendered.estimateTip}`);
+  }
+  if(!distributionRendered.text.includes('Tallest filled bar = most likely')){
+    throw new Error(`Expected legend to distinguish peak from estimate, got ${distributionRendered.text}`);
   }
   if(!distributionRendered.tips.every(tip => tip && tip.startsWith('ATAR '))){
     throw new Error(`Expected ATAR-outcome tooltips, got ${JSON.stringify(distributionRendered.tips)}`);
