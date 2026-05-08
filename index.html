@@ -287,11 +287,18 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
 .atar-hero.mid .atar-agg-display{color:var(--blue);}
 .atar-hero.low .atar-agg-display{color:var(--text2);}
 .atar-dist{max-width:520px;margin:14px auto 0;padding-top:12px;border-top:1px solid rgba(120,110,90,.18);}
+.atar-dist-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 6px 8px;text-align:left;}
+.atar-dist-title{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text2);}
+.atar-dist-key{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text3);}
 .atar-dist-bars{height:58px;display:flex;align-items:flex-end;gap:3px;padding:0 6px;}
-.atar-dist-bar{flex:1;min-width:3px;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--gold),rgba(184,140,34,.28));opacity:.42;}
+.atar-dist-bar{flex:1;min-width:3px;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--gold),rgba(184,140,34,.28));opacity:.42;position:relative;cursor:help;outline:none;}
 .atar-dist-bar.main{opacity:1;background:linear-gradient(180deg,var(--gold),var(--gold2));box-shadow:0 0 0 1px rgba(184,140,34,.18);}
+.atar-dist-bar:hover,.atar-dist-bar:focus{opacity:1;}
+.atar-dist-bar:hover::after,.atar-dist-bar:focus::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 7px);transform:translateX(-50%);z-index:5;width:max-content;max-width:150px;background:var(--text);color:var(--card);border-radius:6px;padding:5px 7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;line-height:1.35;white-space:normal;box-shadow:0 6px 18px rgba(15,23,42,.18);}
+.atar-dist-bar:hover::before,.atar-dist-bar:focus::before{content:'';position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--text);z-index:6;}
 .atar-dist-axis{display:flex;justify-content:space-between;gap:8px;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);}
-.atar-dist-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:6px;line-height:1.45;}
+.atar-dist-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:6px;line-height:1.45;max-width:460px;margin-left:auto;margin-right:auto;}
+@media(max-width:560px){.atar-dist-head{display:block;text-align:center}.atar-dist-key{margin-top:3px}.atar-dist-bar:hover::after,.atar-dist-bar:focus::after{display:none}.atar-dist-bar:hover::before,.atar-dist-bar:focus::before{display:none}}
 .atar-hero.mid .atar-dist-bar{background:linear-gradient(180deg,var(--blue),rgba(10,94,168,.25));}
 .atar-hero.mid .atar-dist-bar.main{background:linear-gradient(180deg,var(--blue),var(--knox-blue2));box-shadow:0 0 0 1px rgba(10,94,168,.18);}
 .atar-hero.low .atar-dist-bar{background:linear-gradient(180deg,var(--text2),rgba(100,116,139,.22));}
@@ -1954,10 +1961,16 @@ function renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, ata
   const pointAtar = atar !== null ? atar : lookupATAR(aggregate).atar;
 
   el.innerHTML = `
+    <div class="atar-dist-head">
+      <div class="atar-dist-title">Likelihood from KAM rounding</div>
+      <div class="atar-dist-key">Each bar = one aggregate-error slice</div>
+    </div>
     <div class="atar-dist-bars" aria-label="Likely ATAR distribution from rounded KAM uncertainty">
       ${points.map(p => {
         const height = Math.max(4, (p.weight / maxWeight) * 56);
-        return `<div class="atar-dist-bar ${p.i === center ? 'main' : ''}" style="height:${height.toFixed(1)}px" title="ATAR ${formatAtarValue(p.sampleAtar)}"></div>`;
+        const offsetLabel = p.offset >= 0 ? `+${p.offset.toFixed(1)}` : p.offset.toFixed(1);
+        const likelihood = Math.round((p.weight / maxWeight) * 100);
+        return `<div class="atar-dist-bar ${p.i === center ? 'main' : ''}" tabindex="0" style="height:${height.toFixed(1)}px" title="Approx ATAR ${formatAtarValue(p.sampleAtar)} · aggregate ${offsetLabel}" data-tip="ATAR ${formatAtarValue(p.sampleAtar)} · agg ${offsetLabel} · ${likelihood}% rel. likelihood"></div>`;
       }).join('')}
     </div>
     <div class="atar-dist-axis">
@@ -1965,7 +1978,7 @@ function renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, ata
       <span>most likely ${formatAtarValue(pointAtar)}</span>
       <span>${formatAtarValue(highAtar)}</span>
     </div>
-    <div class="atar-dist-note">Rounded KAM errors are more likely to cancel out than all lean the same way, so the centre is the most likely outcome.</div>`;
+    <div class="atar-dist-note">Bars are not exact 0.05 ATAR buckets. They are small slices of the possible aggregate error from rounded KAMs; taller bars mean more likely outcomes.</div>`;
 }
 
 function lookupAggForATAR(targetAtar){
