@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Knox Grammar · 2026 HSC Calculator</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -286,6 +287,27 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
 .atar-hero.high .atar-agg-display{color:var(--gold);}
 .atar-hero.mid .atar-agg-display{color:var(--blue);}
 .atar-hero.low .atar-agg-display{color:var(--text2);}
+.atar-dist{max-width:520px;margin:14px auto 0;padding-top:12px;border-top:1px solid rgba(120,110,90,.18);}
+.atar-dist-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 6px 8px;text-align:left;}
+.atar-dist-title{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text2);}
+.atar-dist-key{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text3);}
+.atar-dist-bars{height:58px;display:flex;align-items:flex-end;gap:3px;padding:0 6px;}
+.atar-dist-bar{flex:1;min-width:3px;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--gold),rgba(184,140,34,.28));opacity:.42;position:relative;cursor:help;outline:none;}
+.atar-dist-bar.peak{opacity:1;background:linear-gradient(180deg,var(--gold),var(--gold2));box-shadow:0 0 0 1px rgba(184,140,34,.18);}
+.atar-dist-bar.estimate{box-shadow:inset 0 0 0 2px rgba(16,24,32,.36);}
+.atar-dist-bar.peak.estimate{box-shadow:0 0 0 1px rgba(184,140,34,.18), inset 0 0 0 2px rgba(16,24,32,.36);}
+.atar-dist-bar:hover,.atar-dist-bar:focus{opacity:1;}
+.atar-dist-bar:hover::after,.atar-dist-bar:focus::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 7px);transform:translateX(-50%);z-index:5;width:max-content;max-width:150px;background:var(--text);color:var(--card);border-radius:6px;padding:5px 7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;line-height:1.35;white-space:normal;box-shadow:0 6px 18px rgba(15,23,42,.18);}
+.atar-dist-bar:hover::before,.atar-dist-bar:focus::before{content:'';position:absolute;left:50%;bottom:calc(100% + 2px);transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--text);z-index:6;}
+.atar-dist-axis{display:flex;justify-content:space-between;gap:8px;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);}
+.atar-dist-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:7px;line-height:1.5;max-width:500px;margin-left:auto;margin-right:auto;}
+.atar-dist-note strong{color:var(--text2);font-weight:700;}
+@media(max-width:560px){.atar-dist-head{display:block;text-align:center}.atar-dist-key{margin-top:3px}.atar-dist-bar:hover::after,.atar-dist-bar:focus::after{display:none}.atar-dist-bar:hover::before,.atar-dist-bar:focus::before{display:none}}
+.atar-hero.mid .atar-dist-bar{background:linear-gradient(180deg,var(--blue),rgba(10,94,168,.25));}
+.atar-hero.mid .atar-dist-bar.peak{background:linear-gradient(180deg,var(--blue),var(--knox-blue2));box-shadow:0 0 0 1px rgba(10,94,168,.18);}
+.atar-hero.mid .atar-dist-bar.peak.estimate{box-shadow:0 0 0 1px rgba(10,94,168,.18), inset 0 0 0 2px rgba(16,24,32,.36);}
+.atar-hero.low .atar-dist-bar{background:linear-gradient(180deg,var(--text2),rgba(100,116,139,.22));}
+.atar-hero.low .atar-dist-bar.peak{background:linear-gradient(180deg,var(--text),var(--text2));}
 
 .working-table{width:100%;border-collapse:collapse;font-size:13px;}
 .working-table th{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);padding:8px 10px;text-align:left;border-bottom:1.5px solid var(--border);background:var(--bg2);}
@@ -424,7 +446,7 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
           </div>
           <div class="how-box">
             <div class="how-box-title">3. Aggregate Score</div>
-            <p>The contributions of your best 10 units are summed to give your <strong>aggregate</strong>, from <code>0</code> to <code>500</code>. Higher aggregate = higher ATAR. The aggregate is simply KAM × units for each subject, totalled.</p>
+            <p>The contributions of your best 10 units are summed to give your <strong>aggregate</strong>, from <code>0</code> to <code>500</code>. Higher aggregate = higher ATAR. The aggregate is simply KAM × units for each subject, totalled. KAMs are rounded to the nearest integer, so the calculator shows the possible <code>+/-0.5 KAM</code> rounding range in aggregate and ATAR results.</p>
           </div>
           <div class="how-box">
             <div class="how-box-title">4. ATAR Lookup</div>
@@ -453,7 +475,7 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
     <!-- Subject list & add more -->
     <div class="card">
       <div class="card-title">Your ATAR Subjects <span id="unitCountBadge" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);font-weight:400;margin-left:8px"></span></div>
-      <div class="card-sub">Enter your KAM (/50) for each subject · subjects auto-sync from Band 6 tab · best 10 units selected automatically · ATAR estimated once you have 10+ units</div>
+      <div class="card-sub">Enter your rounded KAM (/50) for each subject · subjects auto-sync from Band 6 tab · best 10 units selected automatically · ATAR estimated once you have 10+ units</div>
       <div class="notice amber" id="atarNotEnoughUnits" style="margin-bottom:11px;display:none">
         <span>Note</span>
         <span>Enter KAMs covering at least <strong>10 units</strong> to calculate an ATAR. You currently have <span id="currentUnitCount">0</span> units with KAM entered.</span>
@@ -473,6 +495,7 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
         <div class="atar-sub-label">Estimated ATAR</div>
         <div class="atar-big" id="atarBig">—</div>
         <div class="atar-agg-display" id="atarAggDisplay">Aggregate: —</div>
+        <div id="atarDistribution" class="atar-dist"></div>
       </div>
 
       <div class="atar-summary-grid" id="atarSummaryGrid"></div>
@@ -895,8 +918,8 @@ function addSubj(s){
   renderSubjList();persist();syncSharedSubjects();
   ddEl.classList.remove('open');srchEl.value='';
 }
-function removeSubj(i){addedSubjects.splice(i,1);renderSubjList();persist();syncSharedSubjects();}
-function updateField(i,f,v){addedSubjects[i][f]=v;persist();syncSharedSubjects({recalculate:false});updatePersonalInsights();}
+function removeSubj(i){addedSubjects.splice(i,1);renderSubjList();persist();syncSharedSubjects({preserveOverflow:false});}
+function updateField(i,f,v){addedSubjects[i][f]=v;persist();syncSharedSubjects({recalculate:false});}
 
 function renderSubjList(){
   const el=document.getElementById('subjectsList');
@@ -995,14 +1018,14 @@ function renderResults(res){
     let atarEquivCls = 'cgd';
     const atarEntry = (typeof atarSubjects !== 'undefined') ? atarSubjects.find(x => x.sName === s.name) : null;
     if(atarEntry && atarEntry.kam !== '' && atarEntry.kam !== undefined){
-      const kamN = parseFloat(atarEntry.kam);
-      if(!isNaN(kamN)){
+      const kamN = parseKamValue(atarEntry.kam);
+      if(kamN !== null){
         const {atar: subjAtar} = lookupATAR(kamN * 10);
         if(subjAtar !== null){
-          atarEquivStr = roundATAR(subjAtar).toFixed(2);
+          atarEquivStr = `${formatAtarValue(subjAtar)} <span style="display:block;font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace">range ${formatSubjectAtarRange(kamN)}</span>`;
           atarEquivCls = subjAtar >= 90 ? 'cgd' : subjAtar >= 70 ? 'cb' : 'cr';
         } else {
-          atarEquivStr = '<50';
+          atarEquivStr = `<50 <span style="display:block;font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace">range ${formatSubjectAtarRange(kamN)}</span>`;
           atarEquivCls = 'cr';
         }
       }
@@ -1187,11 +1210,11 @@ function updatePersonalInsights(){
     const b6L = r.s.isExt ? 'E4' : 'B6';
     const b5L = r.s.isExt ? 'E3' : 'B5';
     // ATAR equivalent and contribution from the ATAR-tab KAM
-    let atarEq = null, kam = null, contribution = null, units = getSubjectUnits(r.s.name);
+    let atarEq = null, kam = null, contribution = null, units = getSubjectUnits(r.s.name, atarSubjects);
     const atarEntry = (typeof atarSubjects !== 'undefined') ? atarSubjects.find(x => x.sName === r.s.name) : null;
     if(atarEntry && atarEntry.kam !== '' && atarEntry.kam !== undefined){
-      const k = parseFloat(atarEntry.kam);
-      if(!isNaN(k)){
+      const k = parseKamValue(atarEntry.kam);
+      if(k !== null){
         kam = k;
         contribution = k * units;
         const {atar: subjAtar} = lookupATAR(k * 10);
@@ -1248,15 +1271,16 @@ function updatePersonalInsights(){
     const gap = (r.rnkB6 && r.rank && !r.b6On) ? r.rank - r.rnkB6 : null;
     const gapNote = gap !== null && gap > 0 ? `<div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--text3);margin-top:1px">+${gap} for ${b6L}</div>` : '';
 
-    const kamCell = kam !== null ? kam.toFixed(1) : '—';
-    const contribCell = contribution !== null ? contribution.toFixed(1) : '—';
+    const kamCell = kam !== null ? `${kam.toFixed(0)} <span style="display:block;font-size:9px;color:var(--text3)">+/-0.5</span>` : '—';
+    const contributionMargin = contribution !== null ? units * KAM_ROUNDING_MARGIN : null;
+    const contribCell = contribution !== null ? `${contribution.toFixed(1)} <span style="display:block;font-size:9px;color:var(--text3)">+/-${contributionMargin.toFixed(1)}</span>` : '—';
     let atarCell = '—';
     let atarCol = 'var(--text3)';
     if(atarEq !== null){
-      atarCell = atarEq.toFixed(2);
+      atarCell = `${atarEq.toFixed(2)} <span style="display:block;font-size:9px;color:var(--text3)">range ${formatSubjectAtarRange(kam)}</span>`;
       atarCol = atarEq >= 90 ? 'var(--gold)' : atarEq >= 70 ? 'var(--blue)' : 'var(--text2)';
     } else if(kam !== null){
-      atarCell = '<50';
+      atarCell = `<50 <span style="display:block;font-size:9px;color:var(--text3)">range ${formatSubjectAtarRange(kam)}</span>`;
     }
 
     return `<tr>
@@ -1314,7 +1338,7 @@ function updatePersonalInsights(){
       </table>
     </div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:8px;line-height:1.6">
-      Sorted by KAM (per-unit value) — highest first. This matches how the ATAR algorithm picks your best 10 units: a 1-unit course at KAM 46 outranks a 2-unit course at KAM 33. KAMs are sourced from the ATAR tab. ATAR Eq. shows the per-subject equivalent if every other subject matched this performance.
+      Sorted by KAM (per-unit value) — highest first. KAMs are rounded integers sourced from the ATAR tab, so KAM, contribution and ATAR Eq. display the +/-0.5 KAM rounding range.
     </div>`;
 }
 
@@ -1541,11 +1565,13 @@ function switchTab(id,btn){
 // ══════════════════════════════════════════
 let lastAtarForInsights = null;
 let lastAggForInsights = null;
+let lastAggMarginForInsights = null;
 let lastUnitsForInsights = null;
 
-function updateInsightsWithATAR(aggregate, atarRounded, unitsUsed){
+function updateInsightsWithATAR(aggregate, atarRounded, unitsUsed, aggregateMargin = null){
   lastAtarForInsights = atarRounded;
   lastAggForInsights = aggregate;
+  lastAggMarginForInsights = aggregateMargin;
   lastUnitsForInsights = unitsUsed;
   renderAtarInsightBox();
 }
@@ -1558,24 +1584,26 @@ function renderAtarInsightBox(){
     return;
   }
   const atarStr = lastAtarForInsights.toFixed(2);
+  const atarRangeStr = lastAggMarginForInsights !== null ? formatAtarRangeFromAggregate(lastAggForInsights, lastAggMarginForInsights) : '';
   const col = lastAtarForInsights >= 90 ? 'var(--gold)' : lastAtarForInsights >= 70 ? 'var(--blue)' : 'var(--text2)';
   box.style.display = 'block';
   box.innerHTML = `
     <div class="card" style="background:var(--gold-bg);border-color:var(--gold-border)">
       <div class="card-title">🎓 Your ATAR Estimate</div>
-      <div class="card-sub">Sourced from the ATAR tab · based on KAMs you entered there · rounded to nearest 0.05</div>
+      <div class="card-sub">Sourced from the ATAR tab · KAMs are rounded integers, so range includes +/-0.5 KAM per counted unit</div>
       <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-top:8px">
         <div style="text-align:center">
           <div style="font-family:'Fraunces',serif;font-size:48px;font-weight:700;color:${col};line-height:1">${atarStr}</div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Estimated ATAR</div>
         </div>
         <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);font-weight:600">Aggregate: ${lastAggForInsights.toFixed(1)} / 500</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);font-weight:600">Aggregate: ${lastAggForInsights.toFixed(1)}${lastAggMarginForInsights!==null?` +/- ${lastAggMarginForInsights.toFixed(1)}`:''} / 500</div>
+          ${atarRangeStr ? `<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-top:3px">ATAR range from KAM rounding: ${atarRangeStr}</div>` : ''}
           <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-top:3px">${lastUnitsForInsights} / 10 units counted</div>
           <div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.6">
             ${lastAtarForInsights >= 99 ? '🏆 Top 1% of NSW students' : lastAtarForInsights >= 95 ? '🌟 Top 5% of NSW students' : lastAtarForInsights >= 90 ? '⭐ Top 10% of NSW students' : lastAtarForInsights >= 80 ? '📈 Top 20% of NSW students' : '📊 Keep pushing — every 0.05 counts'}
           </div>
-          <div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:'JetBrains Mono',monospace">Based on KAMs — will change as tasks are assessed</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:'JetBrains Mono',monospace">Point estimate plus rounding range</div>
         </div>
       </div>
     </div>`;
@@ -1594,11 +1622,23 @@ const ATAR_LOOKUP = {167:49.96,168:50.17,169:50.38,170:50.6,171:50.81,172:51.02,
 const ONE_UNIT_SUBJECTS = new Set([
   'Chinese Extension','English Extension 1','English Extension 2',
   'French Extension','German Extension','History Extension',
-  'Japanese Extension','Mathematics Extension 1',
+  'Japanese Extension',
   'Music Extension','Science Extension','Studies of Religion I'
 ]);
 
-function getSubjectUnits(name){
+function getSubjectNameSet(subjectList = null){
+  const source = subjectList || (typeof atarSubjects !== 'undefined' ? atarSubjects : []);
+  if(source instanceof Set) return source;
+  return new Set(source.map(s => typeof s === 'string' ? s : (s.sName || s.name)).filter(Boolean));
+}
+
+function getSubjectUnits(name, subjectList = null){
+  const names = getSubjectNameSet(subjectList);
+  const hasMathExt2 = names.has('Mathematics Extension 2');
+
+  if(name === 'Mathematics Extension 2') return 2;
+  if(name === 'Mathematics Extension 1') return hasMathExt2 ? 2 : 1;
+  if(name === 'Mathematics Advanced' && hasMathExt2) return 0;
   if(ONE_UNIT_SUBJECTS.has(name)) return 1;
   return 2;
 }
@@ -1640,16 +1680,26 @@ function isAtarOnlySubject(name){
 }
 
 function syncSharedSubjects(opts = {}){
-  const { render = true, recalculate = true } = opts;
+  const { render = true, recalculate = true, preserveOverflow = true } = opts;
   const existingMap = {};
-  atarSubjects.forEach(a => { existingMap[a.sName] = a.kam; });
-  const existingGoalMap = {};
-  atarSubjects.forEach(a => { existingGoalMap[a.sName] = a.goalKam || ''; });
+  atarSubjects.forEach(a => { existingMap[a.sName] = {...a, goalKam: a.goalKam || ''}; });
+  const addedNames = new Set(addedSubjects.map(a => a.sName));
   const atarOnly = atarSubjects.filter(a => isAtarOnlySubject(a.sName));
+  const overflowShared = preserveOverflow
+    ? atarSubjects.filter(a => !isAtarOnlySubject(a.sName) && !addedNames.has(a.sName))
+    : [];
+  const seen = new Set();
+  const normalize = a => ({...a, goalKam: a.goalKam || ''});
+  const appendUnique = a => {
+    if(seen.has(a.sName)) return null;
+    seen.add(a.sName);
+    return normalize(a);
+  };
   atarSubjects = [
-    ...addedSubjects.map(a => ({ sName: a.sName, kam: existingMap[a.sName] !== undefined ? existingMap[a.sName] : '', goalKam: existingGoalMap[a.sName] || '' })),
-    ...atarOnly.map(a => ({...a, goalKam: a.goalKam||''}))
-  ];
+    ...addedSubjects.map(a => appendUnique(existingMap[a.sName] || { sName: a.sName, kam: '', goalKam: '' })),
+    ...overflowShared.map(appendUnique),
+    ...atarOnly.map(appendUnique)
+  ].filter(Boolean);
   persistAtar();
   if(render) renderAtarSubjectsList();
   if(recalculate) autoCalculateATAR();
@@ -1703,7 +1753,7 @@ atarSrchEl.addEventListener('input', ()=>{
   else{
     matches.slice(0,10).forEach(s=>{
       const el = document.createElement('div'); el.className='dd-item';
-      const units = getSubjectUnits(s.name);
+      const units = getSubjectUnits(s.name, [...atarSubjects.map(a => a.sName), s.name]);
       const atarOnly = !SUBJECTS.find(x => x.name === s.name);
       const atarOnlyBadge = atarOnly ? '<span class="dd-b" style="background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border);font-size:9px">ATAR only</span>' : '';
       el.innerHTML = `<div><div class="dd-sub">${s.name}</div><div class="dd-meta">${units} unit${units!==1?'s':''}${atarOnly?' · no Band 6 data':''}</div></div><div class="dd-badges"><span class="dd-b b6b">${units}u</span>${atarOnlyBadge}</div>`;
@@ -1744,16 +1794,15 @@ function removeAtarSubj(i){
   autoCalculateATAR();
 }
 function updateAtarKam(i, v){
-  atarSubjects[i].kam = v;
+  const kam = parseKamValue(v);
+  atarSubjects[i].kam = kam !== null ? String(kam) : '';
   persistAtar();
   // Update ATAR equiv for this row instantly
-  const units = getSubjectUnits(atarSubjects[i].sName);
-  const kam = v !== '' ? parseFloat(v) : null;
   const equivEl = document.getElementById('atarEquiv'+i);
   if(equivEl){
     if(kam !== null && !isNaN(kam)){
       const {atar} = lookupATAR(kam * 10);
-      equivEl.textContent = atar !== null ? roundATAR(atar).toFixed(2) : '< 50';
+      equivEl.textContent = `${formatAtarValue(atar)} (${formatSubjectAtarRange(kam)})`;
       equivEl.className = 'atar-equiv-val';
     } else {
       equivEl.textContent = '—';
@@ -1780,8 +1829,8 @@ function renderAtarSubjectsList(){
   // valuable unit than a 2-unit subject at KAM 33, even though the latter has higher total contribution.
   const ordered = atarSubjects
     .map((a, origIdx) => {
-      const units = getSubjectUnits(a.sName);
-      const kamN = a.kam !== '' ? parseFloat(a.kam) : null;
+      const units = getSubjectUnits(a.sName, atarSubjects);
+      const kamN = parseKamValue(a.kam);
       return { a, origIdx, units, kamN };
     })
     .sort((x, y) => {
@@ -1805,8 +1854,10 @@ function renderAtarSubjectsList(){
       const subjAgg = kamN * 10; // as if 10-unit aggregate
       const {atar: subjAtar} = lookupATAR(subjAgg);
       if(subjAtar !== null){
-        atarEquivStr = roundATAR(subjAtar).toFixed(2);
+        atarEquivStr = `${formatAtarValue(subjAtar)} <span style="display:block;font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px">range ${formatSubjectAtarRange(kamN)}</span>`;
         atarEquivClass = subjAtar >= 90 ? '' : subjAtar >= 70 ? '' : 'low';
+      } else {
+        atarEquivStr = `< 50 <span style="display:block;font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px">range ${formatSubjectAtarRange(kamN)}</span>`;
       }
     }
     // Show rank badge for top contributors (only when KAM entered)
@@ -1816,7 +1867,7 @@ function renderAtarSubjectsList(){
     return `<div class="atar-subj-row" id="atarRow${i}">
       <div>
         <div class="atar-s-name">${rankBadge}${a.sName}</div>
-        <div class="atar-s-meta">${units} unit${units!==1?'s':''} · KAM × ${units} = contribution</div>
+        <div class="atar-s-meta">${units ? `${units} unit${units!==1?'s':''} · KAM × ${units} = contribution` : 'Not included when Maths Extension 2 is studied'}</div>
         ${rankStr ? `<div class="atar-s-rank">${rankStr}</div>` : ''}
       </div>
       <div class="atar-equiv-box">
@@ -1825,7 +1876,7 @@ function renderAtarSubjectsList(){
       </div>
       <div class="kam-fields">
         <label>KAM</label>
-        <input class="kam-input" type="number" min="0" max="50" step="0.5" placeholder="—" value="${a.kam}"
+        <input class="kam-input" type="number" min="0" max="50" step="1" placeholder="—" value="${a.kam}"
           oninput="updateAtarKam(${i}, this.value)" onchange="renderAtarSubjectsList()">
         <span class="slash">/50</span>
       </div>
@@ -1851,6 +1902,136 @@ function lookupATAR(agg){
   return {atar: ATAR_LOOKUP[rounded] || null, note: ''};
 }
 
+function lookupATARInterpolated(agg){
+  if(agg < 167) return {atar: null, note: 'Below minimum aggregate (167) in lookup table'};
+  if(agg > 479) return {atar: 99.95, note: ''};
+  const lo = Math.floor(agg);
+  const hi = Math.ceil(agg);
+  const loAtar = ATAR_LOOKUP[lo];
+  const hiAtar = ATAR_LOOKUP[hi];
+  if(loAtar === undefined || hiAtar === undefined) return lookupATAR(agg);
+  if(lo === hi) return {atar: loAtar, note: ''};
+  const t = agg - lo;
+  return {atar: loAtar + (hiAtar - loAtar) * t, note: ''};
+}
+
+const KAM_ROUNDING_MARGIN = 0.5;
+
+function parseKamValue(value){
+  if(value === '' || value === null || value === undefined) return null;
+  const parsed = parseFloat(value);
+  if(isNaN(parsed)) return null;
+  return Math.max(0, Math.min(50, Math.round(parsed)));
+}
+
+function getKamRange(kam){
+  if(kam === null || kam === undefined || isNaN(kam)) return null;
+  return {
+    low: Math.max(0, kam - KAM_ROUNDING_MARGIN),
+    high: Math.min(50, kam + KAM_ROUNDING_MARGIN)
+  };
+}
+
+function formatAtarValue(atar){
+  return atar !== null ? roundATAR(atar).toFixed(2) : '< 50';
+}
+
+function formatAtarOutcome(agg){
+  return formatAtarValue(lookupATARInterpolated(agg).atar);
+}
+
+function formatAtarRangeFromAggregate(aggregate, margin){
+  if(aggregate === null || aggregate === undefined || margin === null || margin === undefined) return '';
+  const low = lookupATAR(Math.max(0, aggregate - margin)).atar;
+  const high = lookupATAR(Math.min(500, aggregate + margin)).atar;
+  return `${formatAtarValue(low)}-${formatAtarValue(high)}`;
+}
+
+function formatSubjectAtarRange(kam){
+  const range = getKamRange(kam);
+  if(!range) return '';
+  const low = lookupATAR(range.low * 10).atar;
+  const high = lookupATAR(range.high * 10).atar;
+  return `${formatAtarValue(low)}-${formatAtarValue(high)}`;
+}
+
+function estimateRoundingSigma(subjectRows){
+  const variance = subjectRows.reduce((sum, s) => {
+    const units = s.units || 0;
+    return sum + (units * units) / 12;
+  }, 0);
+  return Math.sqrt(variance);
+}
+
+function renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, atar}){
+  const el = document.getElementById('atarDistribution');
+  if(!el || aggregate === null || aggregateMargin === null || aggregateMargin <= 0) return;
+
+  const samples = 201;
+  const sigma = Math.max(aggregateSigma || 0, 0.35);
+  const points = Array.from({length: samples}, (_, i) => {
+    const t = samples === 1 ? 0 : (i / (samples - 1)) * 2 - 1;
+    const offset = t * aggregateMargin;
+    const weight = Math.exp(-0.5 * Math.pow(offset / sigma, 2));
+    const sampleAgg = aggregate + offset;
+    const sampleAtar = lookupATARInterpolated(sampleAgg).atar;
+    const sampleAtarLabel = formatAtarValue(sampleAtar);
+    return {i, offset, weight, sampleAgg, sampleAtar, sampleAtarLabel};
+  });
+  const totalWeight = points.reduce((sum, p) => sum + p.weight, 0) || 1;
+  const lowAtar = lookupATARInterpolated(Math.max(0, aggregate - aggregateMargin)).atar;
+  const highAtar = lookupATARInterpolated(Math.min(500, aggregate + aggregateMargin)).atar;
+  const pointAtar = atar !== null ? atar : lookupATARInterpolated(aggregate).atar;
+  const pointAtarLabel = formatAtarValue(pointAtar);
+
+  const bucketsByAtar = new Map();
+  points.forEach(p => {
+    const label = p.sampleAtarLabel;
+    const sortValue = p.sampleAtar === null ? -Infinity : roundATAR(p.sampleAtar);
+    if(!bucketsByAtar.has(label)){
+      bucketsByAtar.set(label, {label, sortValue, weight: 0, minOffset: p.offset, maxOffset: p.offset});
+    }
+    const bucket = bucketsByAtar.get(label);
+    bucket.weight += p.weight;
+    bucket.minOffset = Math.min(bucket.minOffset, p.offset);
+    bucket.maxOffset = Math.max(bucket.maxOffset, p.offset);
+  });
+  const buckets = [...bucketsByAtar.values()].sort((a, b) => a.sortValue - b.sortValue);
+  const maxBucketWeight = Math.max(...buckets.map(b => b.weight), 1);
+  const peakBucket = buckets.reduce((best, bucket) => bucket.weight > best.weight ? bucket : best, buckets[0]);
+  const peakLabel = peakBucket ? peakBucket.label : pointAtarLabel;
+
+  el.innerHTML = `
+    <div class="atar-dist-head">
+      <div class="atar-dist-title">Likelihood from KAM rounding</div>
+      <div class="atar-dist-key">Each bar = one ATAR outcome</div>
+    </div>
+    <div class="atar-dist-bars" aria-label="Likely ATAR distribution from rounded KAM uncertainty">
+      ${buckets.map(bucket => {
+        const height = Math.max(4, (bucket.weight / maxBucketWeight) * 56);
+        const minOffset = bucket.minOffset >= 0 ? `+${bucket.minOffset.toFixed(1)}` : bucket.minOffset.toFixed(1);
+        const maxOffset = bucket.maxOffset >= 0 ? `+${bucket.maxOffset.toFixed(1)}` : bucket.maxOffset.toFixed(1);
+        const likelihood = (bucket.weight / totalWeight) * 100;
+        const likelihoodLabel = likelihood >= 1 ? `${likelihood.toFixed(1)}%` : 'less than 1%';
+        const offsetRange = minOffset === maxOffset ? minOffset : `${minOffset} to ${maxOffset}`;
+        const classes = [
+          'atar-dist-bar',
+          bucket.label === peakLabel ? 'peak' : '',
+          bucket.label === pointAtarLabel ? 'estimate' : ''
+        ].filter(Boolean).join(' ');
+        return `<div class="${classes}" tabindex="0" style="height:${height.toFixed(1)}px" title="ATAR ${bucket.label} · about ${likelihoodLabel} · aggregate error ${offsetRange}" data-tip="ATAR ${bucket.label} · about ${likelihoodLabel} · agg ${offsetRange}"></div>`;
+      }).join('')}
+    </div>
+    <div class="atar-dist-axis">
+      <span>${formatAtarValue(lowAtar)}</span>
+      <span>most likely ${peakLabel}${peakLabel!==pointAtarLabel?` · estimate ${pointAtarLabel}`:''}</span>
+      <span>${formatAtarValue(highAtar)}</span>
+    </div>
+    <div class="atar-dist-note">
+      <strong>Why the peak can differ from the estimate:</strong> each bar combines all rounded-KAM scenarios that resolve to that exact ATAR. The aggregate-to-ATAR curve is uneven, so nearby ATAR outcomes can cover slightly wider aggregate ranges than the point estimate. Tallest filled bar = most likely bucket; outlined bar = point estimate.
+    </div>`;
+}
+
 function lookupAggForATAR(targetAtar){
   // Find the minimum aggregate that gives an ATAR >= targetAtar
   const entries = Object.entries(ATAR_LOOKUP).map(([k,v])=>({agg:parseInt(k),atar:v})).sort((a,b)=>a.agg-b.agg);
@@ -1864,8 +2045,8 @@ function lookupAggForATAR(targetAtar){
 // UNIT COUNT BADGE
 // ══════════════════════════════════════════
 function updateUnitCountBadge(){
-  const withKam = atarSubjects.filter(a => a.kam !== '' && !isNaN(parseFloat(a.kam)));
-  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName), 0);
+  const withKam = atarSubjects.filter(a => parseKamValue(a.kam) !== null);
+  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName, withKam), 0);
   const badge = document.getElementById('unitCountBadge');
   if(badge) badge.textContent = `(${unitsWithKam} units entered)`;
   const notice = document.getElementById('atarNotEnoughUnits');
@@ -1880,8 +2061,8 @@ function updateUnitCountBadge(){
 // AUTO CALCULATE ATAR
 // ══════════════════════════════════════════
 function autoCalculateATAR(){
-  const withKam = atarSubjects.filter(a => a.kam !== '' && !isNaN(parseFloat(a.kam)));
-  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName), 0);
+  const withKam = atarSubjects.filter(a => parseKamValue(a.kam) !== null);
+  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName, withKam), 0);
   if(unitsWithKam < 10){
     // Hide results if not enough units
     document.getElementById('atarResults').style.display = 'none';
@@ -1912,19 +2093,19 @@ function refreshBand6AtarEquiv(){
 // GOALS SECTION
 // ══════════════════════════════════════════
 function updateGoalKam(i, v){
-  atarSubjects[i].goalKam = v;
+  const goalKam = parseKamValue(v);
+  atarSubjects[i].goalKam = goalKam !== null ? String(goalKam) : '';
   persistAtar();
   // Update ATAR equiv for this row instantly without re-rendering (preserves focus)
   const equivEl = document.getElementById('goalAtarEquiv'+i);
   if(equivEl){
-    const goalKam = v !== '' ? parseFloat(v) : null;
     if(goalKam !== null && !isNaN(goalKam)){
       const {atar: subjAtar} = lookupATAR(goalKam * 10);
       if(subjAtar !== null){
-        equivEl.textContent = roundATAR(subjAtar).toFixed(2);
+        equivEl.textContent = `${formatAtarValue(subjAtar)} (${formatSubjectAtarRange(goalKam)})`;
         equivEl.style.color = subjAtar >= 90 ? 'var(--gold)' : subjAtar >= 70 ? 'var(--blue)' : 'var(--text2)';
       } else {
-        equivEl.textContent = '< 50';
+        equivEl.textContent = `< 50 (${formatSubjectAtarRange(goalKam)})`;
         equivEl.style.color = 'var(--text3)';
       }
     } else {
@@ -1945,18 +2126,18 @@ function updateGoalsSection(){
   }
   goalsEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:9px;margin-bottom:10px">` +
     atarSubjects.map((a, i) => {
-      const units = getSubjectUnits(a.sName);
+      const units = getSubjectUnits(a.sName, atarSubjects);
       // Compute ATAR equivalent for goal KAM (KAM × 10 as if 10-unit aggregate)
-      const goalKam = a.goalKam !== '' ? parseFloat(a.goalKam) : null;
+      const goalKam = parseKamValue(a.goalKam);
       let goalAtarStr = '—';
       let goalAtarCol = 'var(--text3)';
       if(goalKam !== null && !isNaN(goalKam)){
         const {atar: subjAtar} = lookupATAR(goalKam * 10);
         if(subjAtar !== null){
-          goalAtarStr = roundATAR(subjAtar).toFixed(2);
+          goalAtarStr = `${formatAtarValue(subjAtar)} <span style="display:block;font-size:9.5px;color:var(--text3);font-family:'JetBrains Mono',monospace">range ${formatSubjectAtarRange(goalKam)}</span>`;
           goalAtarCol = subjAtar >= 90 ? 'var(--gold)' : subjAtar >= 70 ? 'var(--blue)' : 'var(--text2)';
         } else {
-          goalAtarStr = '< 50';
+          goalAtarStr = `< 50 <span style="display:block;font-size:9.5px;color:var(--text3);font-family:'JetBrains Mono',monospace">range ${formatSubjectAtarRange(goalKam)}</span>`;
         }
       }
       return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px 12px">
@@ -1970,7 +2151,7 @@ function updateGoalsSection(){
         <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-bottom:7px">${units} units</div>
         <div style="display:flex;align-items:center;gap:6px">
           <label style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace">Goal HSC</label>
-          <input type="number" min="0" max="50" step="0.5" placeholder="—" value="${a.goalKam||''}"
+          <input type="number" min="0" max="50" step="1" placeholder="—" value="${a.goalKam||''}"
             style="background:var(--card);border:1.5px solid var(--border);border-radius:6px;padding:5px 4px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;width:54px;outline:none;text-align:center"
             oninput="updateGoalKam(${i}, this.value)" onfocus="this.style.borderColor='var(--gold2)'" onblur="this.style.borderColor='var(--border)'">
           <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)">/50</span>
@@ -1981,26 +2162,27 @@ function updateGoalsSection(){
 }
 
 function computeGoalATAR(){
-  const withGoal = atarSubjects.filter(a => a.goalKam !== '' && !isNaN(parseFloat(a.goalKam)));
-  const unitsWithGoal = withGoal.reduce((s,a)=>s+getSubjectUnits(a.sName), 0);
+  const withGoal = atarSubjects.filter(a => parseKamValue(a.goalKam) !== null);
+  const unitsWithGoal = withGoal.reduce((s,a)=>s+getSubjectUnits(a.sName, withGoal), 0);
   const resultEl = document.getElementById('goalsResult');
   if(unitsWithGoal < 10){ resultEl.style.display = 'none'; return; }
 
   // Same algorithm as calculateATAR but using goalKam
   const subjData = atarSubjects.map(a => {
-    const units = getSubjectUnits(a.sName);
-    const kam = a.goalKam !== '' ? Math.max(0, Math.min(50, parseFloat(a.goalKam))) : null;
+    const units = getSubjectUnits(a.sName, withGoal);
+    const kam = parseKamValue(a.goalKam);
     const contribution = kam !== null ? kam * units : null;
     return {sName: a.sName, units, kam, contribution};
   });
   const withContrib = subjData.filter(s => s.contribution !== null);
   const { counted } = pickBestTenUnits(withContrib);
   const aggregate = counted.reduce((sum, s) => sum + s.contribution, 0);
+  const aggregateMargin = counted.reduce((sum, s) => sum + (s.units || 0) * KAM_ROUNDING_MARGIN, 0);
   const { atar } = lookupATAR(aggregate);
   if(atar !== null){
     const atarRounded = roundATAR(atar);
     document.getElementById('goalAtarBig').textContent = atarRounded.toFixed(2);
-    document.getElementById('goalAggDisplay').textContent = `Aggregate: ${aggregate.toFixed(1)} / 500`;
+    document.getElementById('goalAggDisplay').textContent = `Aggregate: ${aggregate.toFixed(1)} +/- ${aggregateMargin.toFixed(1)} / 500 · ATAR range ${formatAtarRangeFromAggregate(aggregate, aggregateMargin)}`;
     resultEl.style.display = 'block';
     // Track goal position so chart can render the goal dot
     lastGoalAggregate = aggregate;
@@ -2188,14 +2370,14 @@ function setChartZoom(atarFloor, btn){
 // ══════════════════════════════════════════
 function calculateATAR(){
   // Validate
-  const withKam = atarSubjects.filter(a => a.kam !== '' && !isNaN(parseFloat(a.kam)));
-  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName), 0);
+  const withKam = atarSubjects.filter(a => parseKamValue(a.kam) !== null);
+  const unitsWithKam = withKam.reduce((s,a)=>s+getSubjectUnits(a.sName, withKam), 0);
   if(unitsWithKam < 10){ document.getElementById('atarResults').style.display = 'none'; return; }
 
   // Build subject data with contributions
   const subjData = atarSubjects.map(a => {
-    const units = getSubjectUnits(a.sName);
-    const kam = a.kam !== '' ? Math.max(0, Math.min(50, parseFloat(a.kam))) : null;
+    const units = getSubjectUnits(a.sName, withKam);
+    const kam = parseKamValue(a.kam);
     const contribution = kam !== null ? kam * units : null;
     return {sName: a.sName, units, kam, contribution};
   });
@@ -2208,12 +2390,14 @@ function calculateATAR(){
   const { counted, dropped, unitsUsed } = pickBestTenUnits(withContrib);
 
   const aggregate = counted.reduce((sum, s) => sum + s.contribution, 0);
+  const aggregateMargin = counted.reduce((sum, s) => sum + (s.units || 0) * KAM_ROUNDING_MARGIN, 0);
+  const aggregateSigma = estimateRoundingSigma(counted);
   const { atar, note } = lookupATAR(aggregate);
 
-  renderATARResults({subjData, counted, dropped, noKam, aggregate, atar, note, unitsUsed});
+  renderATARResults({subjData, counted, dropped, noKam, aggregate, aggregateMargin, aggregateSigma, atar, note, unitsUsed});
   document.getElementById('atarResults').style.display = 'block';
   // Update insights tab with ATAR data
-  updateInsightsWithATAR(aggregate, atar ? roundATAR(atar) : null, unitsUsed);
+  updateInsightsWithATAR(aggregate, atar ? roundATAR(atar) : null, unitsUsed, aggregateMargin);
 }
 
 // ══════════════════════════════════════════
@@ -2320,21 +2504,23 @@ function pickBestTenUnits(withContrib){
   return { counted, dropped, unitsUsed };
 }
 
-function renderATARResults({subjData, counted, dropped, noKam, aggregate, atar, note, unitsUsed}){
+function renderATARResults({subjData, counted, dropped, noKam, aggregate, aggregateMargin, aggregateSigma, atar, note, unitsUsed}){
   // Hero
   const hero = document.getElementById('atarHero');
   const bigEl = document.getElementById('atarBig');
   const aggEl = document.getElementById('atarAggDisplay');
   const atarRounded = atar !== null ? roundATAR(atar) : null;
   const atarStr = atarRounded !== null ? atarRounded.toFixed(2) : '< 50';
+  const atarRangeStr = formatAtarRangeFromAggregate(aggregate, aggregateMargin);
   bigEl.textContent = atarStr;
-  aggEl.textContent = `Aggregate: ${aggregate.toFixed(1)} / 500`;
+  aggEl.textContent = `Aggregate: ${aggregate.toFixed(1)} +/- ${aggregateMargin.toFixed(1)} / 500 · ATAR range ${atarRangeStr}`;
   hero.className = 'atar-hero ' + (atarRounded !== null && atarRounded>=90?'high': atarRounded !== null && atarRounded>=70?'mid':'low');
+  renderAtarDistribution({aggregate, aggregateMargin, aggregateSigma, atar});
 
   // Summary cards
   document.getElementById('atarSummaryGrid').innerHTML = `
-    <div class="sum-card"><div class="sum-num cgd">${aggregate.toFixed(1)}</div><div class="sum-lbl">Aggregate</div></div>
-    <div class="sum-card"><div class="sum-num ${atarRounded !== null && atarRounded>=90?'cg':atarRounded !== null && atarRounded>=70?'cb':'cr'}">${atarStr}</div><div class="sum-lbl">Est. ATAR</div></div>
+    <div class="sum-card"><div class="sum-num cgd">${aggregate.toFixed(1)}</div><div class="sum-lbl">Aggregate +/- ${aggregateMargin.toFixed(1)}</div></div>
+    <div class="sum-card"><div class="sum-num ${atarRounded !== null && atarRounded>=90?'cg':atarRounded !== null && atarRounded>=70?'cb':'cr'}">${atarStr}</div><div class="sum-lbl">Est. ATAR · range ${atarRangeStr}</div></div>
     <div class="sum-card"><div class="sum-num">${unitsUsed} / 10</div><div class="sum-lbl">Units Used</div></div>`;
 
   // Working table — handle split subjects by merging counted+dropped halves into a single row
@@ -2354,23 +2540,27 @@ function renderATARResults({subjData, counted, dropped, noKam, aggregate, atar, 
     const isPartial = !!s.partial && countedByName.has(s.sName) && countedByName.get(s.sName).partial;
     const isCounted = countedByName.has(s.sName) && !isPartial; // fully counted
     const isDropped = !countedByName.has(s.sName) && s.contribution !== null;
-    const kamStr = s.kam !== null && s.kam !== undefined ? s.kam.toFixed(1) : '—';
+    const kamStr = s.kam !== null && s.kam !== undefined
+      ? `${s.kam.toFixed(0)} <span style="display:block;font-size:9.5px;color:var(--text3)">+/-0.5</span>`
+      : '—';
 
     // Display values: if partial, show "1 of 2" units and the half/full contribution
     const displayUnits = isPartial ? `1 of ${s.originalUnits||2}` : (s.units || '—');
     const fullContrib = isPartial ? (s.originalContribution || s.contribution * 2) : s.contribution;
     const countedContrib = isPartial ? s.contribution : (isCounted ? s.contribution : null);
+    const contribMargin = s.contribution !== null ? (isPartial ? (s.units || 0) : (s.units || 0)) * KAM_ROUNDING_MARGIN : null;
+    const fullContribMargin = isPartial ? (s.originalUnits || 2) * KAM_ROUNDING_MARGIN : contribMargin;
     const contribStr = s.contribution === null
       ? '—'
       : isPartial
-        ? `${countedContrib.toFixed(1)} <span style="color:var(--text3);font-weight:400">(of ${fullContrib.toFixed(1)})</span>`
-        : s.contribution.toFixed(1);
+        ? `${countedContrib.toFixed(1)} +/- ${contribMargin.toFixed(1)} <span style="color:var(--text3);font-weight:400">(of ${fullContrib.toFixed(1)} +/- ${fullContribMargin.toFixed(1)})</span>`
+        : `${s.contribution.toFixed(1)} +/- ${contribMargin.toFixed(1)}`;
 
     // ATAR equivalent for this subject (KAM × 10)
     let atarEquivStr = '—';
     if(s.kam !== null && s.kam !== undefined){
       const {atar: sa} = lookupATAR(s.kam * 10);
-      if(sa !== null) atarEquivStr = roundATAR(sa).toFixed(2);
+      atarEquivStr = `${formatAtarValue(sa)} <span style="display:block;font-size:9.5px;color:var(--text3)">range ${formatSubjectAtarRange(s.kam)}</span>`;
     }
 
     let status;
@@ -2401,9 +2591,9 @@ function renderATARResults({subjData, counted, dropped, noKam, aggregate, atar, 
   document.getElementById('atarWorkingFoot').innerHTML = `
     <tr style="background:var(--bg2)">
       <td colspan="3" style="font-weight:600;font-family:'JetBrains Mono',monospace;font-size:12px;padding:9px 10px;color:var(--text)">AGGREGATE TOTAL</td>
-      <td style="text-align:center;font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--gold);padding:9px 10px">${aggregate.toFixed(1)}</td>
+      <td style="text-align:center;font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--gold);padding:9px 10px">${aggregate.toFixed(1)} +/- ${aggregateMargin.toFixed(1)}</td>
       <td style="padding:9px 10px"></td>
-      <td style="padding:9px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)">→ ATAR ${atarStr}${note?` · ${note}`:''}</td>
+      <td style="padding:9px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)">→ ATAR ${atarStr} · range ${atarRangeStr}${note?` · ${note}`:''}</td>
     </tr>`;
 
   // Init/update chart with your dot
