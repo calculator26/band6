@@ -5,8 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Knox Grammar · 2026 HSC Calculator</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"
+  integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"></script>
 <style>
 :root{
   --bg:#f4f7fb;--bg2:#e8eef6;--bg3:#d8e2ee;
@@ -175,6 +181,14 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
 
 .advice-box{background:var(--bg2);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:10px 13px;font-size:13px;line-height:1.65;color:var(--text2);}
 .advice-box strong{color:var(--text);}
+
+/* WHAT-IF RANK SLIDER */
+.whatif{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;margin:8px 0 12px;}
+.whatif-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.whatif-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);}
+.whatif-rank{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);font-weight:500;}
+.whatif-slider{width:100%;accent-color:var(--knox-blue);cursor:pointer;height:22px;}
+.whatif-out{font-size:12.5px;color:var(--text2);margin-top:6px;}
 
 .sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
 @media(max-width:500px){.sum-grid{grid-template-columns:repeat(2,1fr);}}
@@ -362,7 +376,9 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
   </div>
   <div class="topbar-right">
     <div class="save-ind"><div class="save-dot" id="saveDot"></div><span id="saveText">All saved</span></div>
-    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">Dark</button>
+    <button class="theme-btn" onclick="shareLink()" id="shareBtn" aria-label="Copy a shareable link to your entries" title="Copy a shareable link to your entries">Share</button>
+    <button class="theme-btn" onclick="resetAll()" id="resetBtn" aria-label="Clear all subjects and entries">Reset</button>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle dark mode">Dark</button>
   </div>
 </div>
 
@@ -388,15 +404,15 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
     </div>
   </div>
 
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('calc',this)">Band 6</button>
-    <button class="tab-btn" onclick="switchTab('atar',this)">ATAR</button>
-    <button class="tab-btn" onclick="switchTab('insights',this)">Insights</button>
-    <button class="tab-btn" onclick="switchTab('timeline',this)">Timeline</button>
+  <div class="tabs" role="tablist" aria-label="Calculator sections">
+    <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-calc" onclick="switchTab('calc',this)">Band 6</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-atar" onclick="switchTab('atar',this)">ATAR</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-insights" onclick="switchTab('insights',this)">Insights</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-timeline" onclick="switchTab('timeline',this)">Timeline</button>
   </div>
 
   <!-- ══ CALCULATOR ══ -->
-  <div id="tab-calc" class="tab-content active">
+  <div id="tab-calc" class="tab-content active" role="tabpanel">
     <div class="notice amber">
       <span>Note</span>
       <span><strong>Important disclaimers:</strong> (1) This tool assumes you maintain your current internal rank in both school assessments and the HSC external exam. In reality, rankings shift substantially between now, Trials, and the HSC — some students improve significantly, others drop. (2) Band thresholds are based on Knox's historical cohort — the 2026 cohort will differ. (3) B6 = 90+ scaled mark; B5 = 80+. Your percentile = rank ÷ cohort size.</span>
@@ -425,11 +441,11 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
   </div>
 
   <!-- ══ ATAR CALCULATOR ══ -->
-  <div id="tab-atar" class="tab-content">
+  <div id="tab-atar" class="tab-content" role="tabpanel">
 
     <!-- Merged How It Works + Disclaimers accordion -->
     <div class="how-accordion">
-      <div class="how-acc-header" onclick="toggleHowAcc(this)">
+      <div class="how-acc-header" role="button" tabindex="0" aria-expanded="false" aria-controls="howAccBody" onclick="toggleHowAcc(this)" onkeydown="actKey(event,()=>toggleHowAcc(this))">
         <span class="how-acc-title">How the ATAR Calculator Works & Disclaimers</span>
         <span class="how-acc-arrow" id="howArrow">▾</span>
       </div>
@@ -580,7 +596,7 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
   </div>
 
   <!-- ══ INSIGHTS ══ -->
-  <div id="tab-insights" class="tab-content">
+  <div id="tab-insights" class="tab-content" role="tabpanel">
     <div class="notice blue"><span>Info</span><span>Your subjects with rank, percentile, status and ATAR equivalent — all in one place. Reference table below shows Knox vs State Band 6 rates for every subject. ATAR estimate at the bottom.</span></div>
 
     <!-- Personal combined table — your subjects, rank, status, ATAR equiv -->
@@ -604,11 +620,11 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
           <thead>
             <tr>
               <th style="width:26px">#</th>
-              <th onclick="sortIns('name')" id="th-name">Subject</th>
-              <th onclick="sortIns('b6Rate')" id="th-b6Rate" class="sorted">Knox B6 ▾</th>
-              <th onclick="sortIns('b5Rate')" id="th-b5Rate">Knox B5+</th>
-              <th onclick="sortIns('stateB6')" id="th-stateB6">State B6</th>
-              <th onclick="sortIns('adv')" id="th-adv">Advantage</th>
+              <th role="button" tabindex="0" onclick="sortIns('name')" onkeydown="actKey(event,()=>sortIns('name'))" id="th-name">Subject</th>
+              <th role="button" tabindex="0" onclick="sortIns('b6Rate')" onkeydown="actKey(event,()=>sortIns('b6Rate'))" id="th-b6Rate" class="sorted" aria-sort="descending">Knox B6 ▾</th>
+              <th role="button" tabindex="0" onclick="sortIns('b5Rate')" onkeydown="actKey(event,()=>sortIns('b5Rate'))" id="th-b5Rate">Knox B5+</th>
+              <th role="button" tabindex="0" onclick="sortIns('stateB6')" onkeydown="actKey(event,()=>sortIns('stateB6'))" id="th-stateB6">State B6</th>
+              <th role="button" tabindex="0" onclick="sortIns('adv')" onkeydown="actKey(event,()=>sortIns('adv'))" id="th-adv">Advantage</th>
             </tr>
           </thead>
           <tbody id="insBody"></tbody>
@@ -621,7 +637,7 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
   </div>
 
   <!-- ══ TIMELINE ══ -->
-  <div id="tab-timeline" class="tab-content">
+  <div id="tab-timeline" class="tab-content" role="tabpanel">
     <div class="notice green"><span>Dates</span><span>Official Knox 2026 term dates plus key Year 12 milestones. All dates confirmed from the Knox website and NESA.</span></div>
     <div class="cd-pair">
       <div class="cd-widget">
@@ -885,7 +901,9 @@ function persist(){
 function loadPersisted(){
   try{const d=localStorage.getItem('knox26_subj');if(d)addedSubjects=JSON.parse(d);}catch(e){}
   try{
-    const t=localStorage.getItem('knox26_theme');
+    let t=localStorage.getItem('knox26_theme');
+    // No saved preference → follow the OS/browser setting on first visit.
+    if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
     if(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('themeBtn').textContent=t==='dark'?'Light':'Dark';}
   }catch(e){}
 }
@@ -919,7 +937,27 @@ function addSubj(s){
   ddEl.classList.remove('open');srchEl.value='';
 }
 function removeSubj(i){addedSubjects.splice(i,1);renderSubjList();persist();syncSharedSubjects({preserveOverflow:false});}
-function updateField(i,f,v){addedSubjects[i][f]=v;persist();syncSharedSubjects({recalculate:false});}
+function updateField(i,f,v){addedSubjects[i][f]=v;persist();syncSharedSubjects({recalculate:false});validateSubjRow(i);}
+// Live rank>cohort feedback without a full re-render (which would steal input focus).
+function validateSubjRow(i){
+  const rows=document.querySelectorAll('#subjectsList .subj-row');
+  const row=rows[i]; const e=addedSubjects[i];
+  if(!row||!e) return;
+  const rankN=parseInt(e.rank)||null, cohortN=parseInt(e.cohort)||null;
+  const invalid = rankN!==null && cohortN!==null && rankN>cohortN;
+  row.querySelectorAll('.num-input').forEach(inp=>{
+    inp.style.borderColor=invalid?'var(--red)':'';
+    inp.setAttribute('aria-invalid',invalid);
+  });
+  let warn=row.querySelector('.s-warn');
+  if(invalid && !warn){
+    warn=document.createElement('div');
+    warn.className='s-warn';warn.setAttribute('role','alert');
+    warn.style.cssText="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--red);margin-top:3px";
+    warn.textContent="⚠ Rank can't be higher than cohort";
+    row.querySelector('.s-m2').after(warn);
+  } else if(!invalid && warn){ warn.remove(); }
+}
 
 function renderSubjList(){
   const el=document.getElementById('subjectsList');
@@ -930,20 +968,24 @@ function renderSubjList(){
     const b6L=s.isExt?'E4':'B6', b5L=s.isExt?'E3':'B5';
     const b6d=s.available?(s.b6Rate*100).toFixed(1)+'%':'N/A';
     const b5d=s.available?(s.b5Rate*100).toFixed(1)+'%':'N/A';
+    const rankN=parseInt(e.rank)||null, cohortN=parseInt(e.cohort)||null;
+    const invalid = rankN!==null && cohortN!==null && rankN>cohortN;
+    const invCls = invalid?' style="border-color:var(--red)"':'';
     return`<div class="subj-row">
       <div>
         <div class="s-name">${s.name}</div>
         <div class="s-m1">Knox ${b6L}: ${b6d}</div>
         <div class="s-m2">Knox ${b5L}+: ${b5d}</div>
+        ${invalid?`<div class="s-warn" role="alert" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--red);margin-top:3px">⚠ Rank can't be higher than cohort</div>`:''}
       </div>
       <div class="rank-fields">
         <label>Rank</label>
-        <input class="num-input" type="number" min="1" placeholder="25" value="${e.rank}" oninput="updateField(${i},'rank',this.value)">
+        <input class="num-input" type="number" min="1" placeholder="25" value="${e.rank}" aria-label="Rank in ${s.name}" aria-invalid="${invalid}"${invCls} oninput="updateField(${i},'rank',this.value)">
         <span class="slash">/</span>
-        <input class="num-input" type="number" min="1" placeholder="80" value="${e.cohort}" oninput="updateField(${i},'cohort',this.value)">
+        <input class="num-input" type="number" min="1" placeholder="80" value="${e.cohort}" aria-label="Cohort size for ${s.name}" aria-invalid="${invalid}"${invCls} oninput="updateField(${i},'cohort',this.value)">
         <label>Cohort</label>
       </div>
-      <button class="rm-btn" onclick="removeSubj(${i})">×</button>
+      <button class="rm-btn" onclick="removeSubj(${i})" aria-label="Remove ${s.name}">×</button>
     </div>`;
   }).join('');
 }
@@ -954,14 +996,16 @@ function buildResults(){
     const s=active.find(x=>x.name===e.sName);
     if(!s) return null;
     const rank=parseInt(e.rank)||null, cohort=parseInt(e.cohort)||null;
-    const pct=(rank&&cohort)?rank/cohort:null;
+    // Rank can't exceed cohort size — flag it and skip band maths so we don't show a >100% percentile.
+    const invalid = rank!==null && cohort!==null && rank>cohort;
+    const pct=(rank&&cohort&&!invalid)?rank/cohort:null;
     const avail=s.available;
     const b6On=avail&&pct!==null?pct<=s.b6Rate:null;
     const b5On=avail&&pct!==null?pct<=s.b5Rate:null;
     const gapB6=avail&&pct!==null?pct-s.b6Rate:null;
     const rnkB6=avail&&cohort?Math.ceil(s.b6Rate*cohort):null;
     const rnkB5=avail&&cohort?Math.ceil(s.b5Rate*cohort):null;
-    return{s,rank,cohort,pct,b6On,b5On,gapB6,rnkB6,rnkB5,avail};
+    return{s,rank,cohort,pct,b6On,b5On,gapB6,rnkB6,rnkB5,avail,invalid};
   }).filter(Boolean);
 }
 
@@ -972,6 +1016,20 @@ function calculate(){
   document.getElementById('results').style.display='block';
   updatePersonalInsights();updateStudyPlanner();
   setTimeout(()=>document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'}),60);
+}
+
+// Live recompute for the per-subject what-if rank slider (no state mutation).
+function whatIfRank(el){
+  const wrap=el.closest('.whatif'); if(!wrap) return;
+  const cohort=+wrap.dataset.cohort, b6=+wrap.dataset.b6, b5=+wrap.dataset.b5, isExt=wrap.dataset.ext==='1';
+  const r=+el.value, pct=r/cohort;
+  const b6L=isExt?'E4':'B6', b5L=isExt?'E3':'B5';
+  let wl,wc;
+  if(pct<=b6){wl='on track for '+b6L;wc='var(--green)';}
+  else if(pct<=b5){wl='on track for '+b5L+' only';wc='var(--blue)';}
+  else {wl='below '+b5L;wc='var(--red)';}
+  wrap.querySelector('.whatif-rank').textContent='Rank '+r+' / '+cohort;
+  wrap.querySelector('.whatif-out').innerHTML='Top '+(pct*100).toFixed(1)+'% — <strong style="color:'+wc+'">'+wl+'</strong>';
 }
 
 function renderResults(res){
@@ -1009,8 +1067,8 @@ function renderResults(res){
   hdr.innerHTML=`<span class="res-emoji">${emoji}</span><div class="res-verdict">${verdict}</div><p class="res-msg">${msg}</p>`;
 
   document.getElementById('subjResults').innerHTML=res.map((r,i)=>{
-    const{s,rank,cohort,pct,b6On,b5On,gapB6,rnkB6,rnkB5,avail}=r;
-    const pStr=pct!==null?(pct*100).toFixed(1)+'%':'—';
+    const{s,rank,cohort,pct,b6On,b5On,gapB6,rnkB6,rnkB5,avail,invalid}=r;
+    const pStr=pct!==null?(pct*100).toFixed(1)+'%':(invalid?'!':'—');
     const b6L=s.isExt?'E4':'B6', b5L=s.isExt?'E3':'B5';
 
     // Pull ATAR equivalent for this subject from KAM entered on the ATAR tab
@@ -1032,6 +1090,7 @@ function renderResults(res){
     }
 
     let b6BC='b-gray',b6BT=avail?'Enter rank':'N/A for year';
+    if(invalid){b6BC='b-no';b6BT='⚠ Rank > cohort';}
     if(avail&&pct!==null){
       if(b6On){b6BC='b-yes';b6BT=`✓ ${b6L} on track`;}
       else if(gapB6!==null&&gapB6<.08){b6BC='b-close';b6BT=`≈ Close to ${b6L}`;}
@@ -1045,7 +1104,9 @@ function renderResults(res){
 
     // Advice — no subject-specific tips in this section
     let advice='';
-    if(!avail){
+    if(invalid){
+      advice=`<strong>Check your numbers.</strong> Your rank (${rank}) is higher than your cohort size (${cohort}). Rank can't exceed the number of students in the course — update the values above to see your band chances.`;
+    } else if(!avail){
       advice=`<strong>No Knox data available for this subject in the selected year.</strong> Switch to a different year or the 3-year average using the selector at the top of the page.`;
     } else if(pct===null){
       advice=`Enter your rank and cohort size to see how you compare. Knox ${b6L} threshold: top ${(s.b6Rate*100).toFixed(1)}% of cohort. Knox ${b5L} threshold: top ${(s.b5Rate*100).toFixed(1)}%.`;
@@ -1065,6 +1126,25 @@ function renderResults(res){
     const b5W=avail?Math.min(s.b5Rate*100,100):0;
     const youW=pct!==null?Math.min(pct*100,100):null;
     const youCol=b6On?'#22c55e':b5On?'#3b82f6':'#ef4444';
+
+    // What-if rank slider — only when we have a cohort size and Knox data for this year.
+    let whatIfHtml='';
+    if(avail && cohort){
+      const wiStart = (rank && rank<=cohort) ? rank : Math.max(1,Math.round(cohort/2));
+      const wiPct = wiStart/cohort;
+      let wl,wc;
+      if(wiPct<=s.b6Rate){wl='on track for '+b6L;wc='var(--green)';}
+      else if(wiPct<=s.b5Rate){wl='on track for '+b5L+' only';wc='var(--blue)';}
+      else {wl='below '+b5L;wc='var(--red)';}
+      whatIfHtml=`<div class="whatif" data-cohort="${cohort}" data-b6="${s.b6Rate}" data-b5="${s.b5Rate}" data-ext="${s.isExt?1:0}">
+        <div class="whatif-head">
+          <span class="whatif-title">What if my rank changes?</span>
+          <span class="whatif-rank" aria-live="polite">Rank ${wiStart} / ${cohort}</span>
+        </div>
+        <input class="whatif-slider" type="range" min="1" max="${cohort}" value="${wiStart}" aria-label="Simulate a different rank in ${s.name}" oninput="whatIfRank(this)">
+        <div class="whatif-out" aria-live="polite">Top ${(wiPct*100).toFixed(1)}% — <strong style="color:${wc}">${wl}</strong></div>
+      </div>`;
+    }
 
     return`<div class="sr-card" style="animation-delay:${i*.06}s">
       <div class="sr-header">
@@ -1101,6 +1181,7 @@ function renderResults(res){
           ${youW!==null?`<div class="band-leg-item"><div class="band-leg-dot" style="background:${youCol}"></div>You — top ${youW.toFixed(1)}%</div>`:''}
         </div>
       </div>`:''}
+      ${whatIfHtml}
       <div class="advice-box">${advice}</div>
     </div>`;
   }).join('');
@@ -1185,6 +1266,8 @@ function renderInsTable(){
     const base={name:'Subject',b6Rate:'Knox B6',b5Rate:'Knox B5+',stateB6:'State B6',adv:'Advantage'}[k];
     th.textContent=k===insSortKey?base+(insSortDir===-1?' ▾':' ▴'):base;
     th.className=k===insSortKey?'sorted':'';
+    if(k===insSortKey) th.setAttribute('aria-sort',insSortDir===-1?'descending':'ascending');
+    else th.removeAttribute('aria-sort');
   });
 }
 
@@ -1555,10 +1638,84 @@ function toggleTheme(){
 
 function switchTab(id,btn){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-selected','false');});
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
+  btn.setAttribute('aria-selected','true');
   if(id === 'atar') onOpenAtarTab();
+}
+
+// Run a handler on Enter/Space for keyboard users on non-button controls (sort headers, accordion).
+function actKey(e,fn){ if(e.key==='Enter'||e.key===' '){e.preventDefault();fn();} }
+
+// Left/Right arrow navigation across the tablist (ARIA tab pattern).
+document.addEventListener('keydown',e=>{
+  if((e.key!=='ArrowRight'&&e.key!=='ArrowLeft')||!e.target.classList||!e.target.classList.contains('tab-btn')) return;
+  const tabs=[...document.querySelectorAll('.tab-btn')];
+  const i=tabs.indexOf(e.target);
+  const next=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];
+  next.focus();next.click();
+});
+
+// ══════════════════════════════════════════
+// SHARE & RESET
+// ══════════════════════════════════════════
+// Encode the whole entry set into a compact, URL-safe payload (unicode-safe base64).
+function encodeState(st){ return btoa(unescape(encodeURIComponent(JSON.stringify(st)))); }
+function decodeState(str){ return JSON.parse(decodeURIComponent(escape(atob(str)))); }
+
+function buildShareState(){
+  const yearSel=document.getElementById('globalYear');
+  return {
+    y: yearSel ? yearSel.value : 'avg',
+    s: addedSubjects.map(e=>[e.sName, e.rank||'', e.cohort||'']),
+    a: (typeof atarSubjects!=='undefined'?atarSubjects:[]).map(a=>[a.sName, a.kam||'', a.goalKam||''])
+  };
+}
+
+function shareLink(){
+  try{
+    const code='#d='+encodeState(buildShareState());
+    const url=location.origin+location.pathname+location.search+code;
+    if(history.replaceState) history.replaceState(null,'',code);
+    const btn=document.getElementById('shareBtn');
+    const flash=msg=>{ if(btn){const o=btn.textContent;btn.textContent=msg;setTimeout(()=>btn.textContent=o,1800);} };
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(()=>flash('Link copied ✓'),()=>prompt('Copy this link:',url));
+    } else {
+      prompt('Copy this link to share your entries:',url);
+    }
+  }catch(e){ alert('Sorry — could not create a share link in this browser.'); }
+}
+
+// Returns true if entries were loaded from the URL (takes precedence over saved data).
+function loadFromShare(){
+  if(!location.hash || location.hash.indexOf('d=')===-1) return false;
+  try{
+    const code=location.hash.replace(/^#/,'').split('d=')[1];
+    if(!code) return false;
+    const st=decodeState(code);
+    if(Array.isArray(st.s)) addedSubjects=st.s.slice(0,7).map(a=>({sName:a[0],rank:a[1]||'',cohort:a[2]||''}));
+    if(Array.isArray(st.a)) atarSubjects=st.a.map(a=>({sName:a[0],kam:a[1]||'',goalKam:a[2]||''}));
+    const ys=document.getElementById('globalYear');
+    if(st.y && ys){ ys.value=st.y; currentYear=st.y; }
+    return true;
+  }catch(e){ return false; }
+}
+
+function resetAll(){
+  if(!confirm('Clear all your subjects, ranks and KAMs? This can’t be undone.')) return;
+  addedSubjects=[];
+  if(typeof atarSubjects!=='undefined') atarSubjects=[];
+  try{localStorage.removeItem('knox26_subj');localStorage.removeItem('knox26_atar');}catch(e){}
+  if(history.replaceState) history.replaceState(null,'',location.pathname+location.search);
+  renderSubjList();
+  if(typeof renderAtarSubjectsList==='function') renderAtarSubjectsList();
+  const r=document.getElementById('results'); if(r) r.style.display='none';
+  const ar=document.getElementById('atarResults'); if(ar) ar.style.display='none';
+  if(typeof updatePersonalInsights==='function') updatePersonalInsights();
+  lastAtarForInsights=null;
+  if(typeof renderAtarInsightBox==='function') renderAtarInsightBox();
 }
 
 // ══════════════════════════════════════════
@@ -2230,6 +2387,18 @@ let currentChartZoom = 50;
 function initOrUpdateChart(aggregate, atar){
   const ctx = document.getElementById('atarLineChart');
   if(!ctx) return;
+  // Graceful degradation if the Chart.js CDN failed to load (offline / blocked / SRI mismatch).
+  if(typeof Chart === 'undefined'){
+    const card = ctx.closest('.card');
+    if(card && !card.querySelector('.chart-fallback')){
+      const note = document.createElement('div');
+      note.className = 'chart-fallback notice amber';
+      note.style.margin = '0';
+      note.innerHTML = "<span>Note</span><span>The interactive chart couldn't load (you may be offline). All ATAR numbers above are still accurate — only the visual curve is unavailable.</span>";
+      ctx.replaceWith(note);
+    }
+    return;
+  }
   lastChartAggregate = aggregate;
   lastChartAtar = atar;
   const {labels, data} = buildChartData();
@@ -2637,6 +2806,7 @@ function toggleHowAcc(header){
   const isOpen = body.classList.contains('open');
   body.classList.toggle('open', !isOpen);
   arrow.classList.toggle('open', !isOpen);
+  header.setAttribute('aria-expanded', String(!isOpen));
 }
 
 // INIT
@@ -2644,6 +2814,8 @@ function toggleHowAcc(header){
   loadPersisted();
   loadAtarPersisted();
   migrateAtarSubjectsToBand6();
+  // A shared link (#d=…) overrides saved data, then saves so it sticks for this browser.
+  if(loadFromShare()){ persist(); if(typeof persistAtar==='function') persistAtar(); onYearChange(); }
   renderSubjList();
   renderInsTable();
   renderTimeline();
