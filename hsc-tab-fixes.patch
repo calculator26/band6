@@ -1,0 +1,539 @@
+diff --git a/index.html b/index.html
+index d259860..1cc89fc 100644
+--- a/index.html
++++ b/index.html
+@@ -219,7 +219,7 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
+ .pers-box{border-radius:9px;padding:12px;border:1px solid var(--border);}
+ 
+ /* TIMELINE */
+-.cd-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
++.cd-pair{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:14px;}
+ @media(max-width:520px){.cd-pair{grid-template-columns:1fr;}}
+ .cd-widget{background:var(--card);border:1.5px solid var(--border);border-radius:11px;padding:16px 18px;box-shadow:var(--shadow);}
+ .cd-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
+@@ -407,6 +407,7 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
+   <div class="tabs" role="tablist" aria-label="Calculator sections">
+     <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-calc" onclick="switchTab('calc',this)">Band 6</button>
+     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-atar" onclick="switchTab('atar',this)">ATAR</button>
++    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-hsc" onclick="switchTab('hsc',this)">HSC → ATAR</button>
+     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-insights" onclick="switchTab('insights',this)">Insights</button>
+     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-timeline" onclick="switchTab('timeline',this)">Timeline</button>
+   </div>
+@@ -609,7 +610,7 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
+     <!-- Reference table: all subjects -->
+     <div class="card">
+       <div class="card-title">All Subjects — Band Rates Reference</div>
+-      <div class="card-sub" id="insCardSub">3-year average (2023–2025) · sortable · searchable</div>
++      <div class="card-sub" id="insCardSub">3-year average (2023–2025) · sortable · searchable · “B6 floor → ATAR” = what an HSC mark of exactly 90 (45 in 1-unit Extension) is worth as an ATAR contribution. Higher = a Band 6 is harder to earn there.</div>
+       <div style="margin-bottom:11px;">
+         <input type="text" id="insSearch" placeholder="Search subjects…" oninput="filterIns(this.value)"
+           style="width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);outline:none;transition:border-color .2s;"
+@@ -625,6 +626,7 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
+               <th role="button" tabindex="0" onclick="sortIns('b5Rate')" onkeydown="actKey(event,()=>sortIns('b5Rate'))" id="th-b5Rate">Knox B5+</th>
+               <th role="button" tabindex="0" onclick="sortIns('stateB6')" onkeydown="actKey(event,()=>sortIns('stateB6'))" id="th-stateB6">State B6</th>
+               <th role="button" tabindex="0" onclick="sortIns('adv')" onkeydown="actKey(event,()=>sortIns('adv'))" id="th-adv">Advantage</th>
++              <th role="button" tabindex="0" onclick="sortIns('b6Atar')" onkeydown="actKey(event,()=>sortIns('b6Atar'))" id="th-b6Atar" title="ATAR contribution of the LOWEST Band 6 — an HSC mark of exactly 90/100, or exactly 45/50 in one-unit Extension courses. A higher number means a Band 6 is harder to earn there, not that the course scales generously.">B6 floor → ATAR</th>
+             </tr>
+           </thead>
+           <tbody id="insBody"></tbody>
+@@ -636,16 +638,81 @@ body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--card
+     <div id="atarInsightBox" style="display:none;margin-top:14px"></div>
+   </div>
+ 
++
++  <!-- ══ HSC → ATAR ══ -->
++  <div id="tab-hsc" class="tab-content" role="tabpanel">
++
++    <div class="notice blue">
++      <span>Not raw marks</span>
++      <span><strong>An HSC mark is NOT a raw mark.</strong> Raw marks — what the marker actually writes on your paper — are never published, and in most courses they sit well below the HSC mark. NESA aligns raw marks to performance bands, which stretches them. So a raw 68 on a hard paper can become an HSC mark in the 80s. Nothing on this page takes a raw mark as input.<br><br><strong>You will not have real HSC marks until December.</strong> Until then this is a planning tool: set a target to see what each course must deliver, or try a hypothetical mark to see what it would be worth. Your <strong>rank</strong> and <strong>KAM</strong> (ATAR tab) stay the better guide to where you actually stand.<br><br>
++      <strong>HSC mark</strong> is the number on your results notice (out of 100, or 50 for 1-unit Extension) — the average of your moderated assessment mark and your exam mark, aligned to bands. It is <em>not</em> your raw exam mark; raw marks are never published and are usually much lower.
++      <strong>Contribution</strong> is what <em>one course</em> is worth toward your ATAR, on an ATAR-like scale. A course contributing 95 is pulling its weight for a 95 ATAR. Your actual ATAR comes from the best 10 units together, so courses trade off — one at 92 can be carried by one at 98.</span>
++    </div>
++
++    <div class="card">
++      <div class="card-title">HSC Mark → ATAR Contribution</div>
++      <div class="card-sub" id="hscSub">You haven't sat the HSC yet — nobody has an HSC mark until December. This works both directions before then. <strong>Set a target ATAR</strong> and the "Mark needed" column shows what each course must deliver. <strong>Type into "Try a mark"</strong> to test a scenario and see what that result would be worth. It's a what-if, not a prediction.</div>
++
++      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:4px 0 14px">
++        <label style="font-size:13px;color:var(--text2)">Target ATAR</label>
++        <input type="number" id="hscTarget" min="50" max="99.95" step="0.05" value="98"
++          style="width:96px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:13.5px;color:var(--text);outline:none"
++          oninput="renderHscTab()">
++        <button class="zoom-btn" onclick="clearHscMarks()">Clear scenario</button>
++      </div>
++
++      <div style="overflow-x:auto">
++        <table class="ins-table" id="hscTable">
++          <thead><tr>
++            <th>Subject</th><th style="width:52px">Units</th><th style="width:56px">Out of</th>
++            <th style="width:96px" id="hscNeedTh">Mark needed</th>
++            <th style="width:104px">Try a mark</th><th style="width:96px">Contribution</th>
++          </tr></thead>
++          <tbody id="hscBody"></tbody>
++        </table>
++      </div>
++      <div id="hscSummary" style="margin-top:14px"></div>
++    </div>
++
++    <div class="card">
++      <div class="card-title">The Curve</div>
++      <div class="card-sub">Every one of your subjects at once. Horizontal is <strong>HSC mark</strong> (the aligned mark on your results notice — <em>not</em> a raw mark). Vertical is that course's ATAR contribution. Steep means marks are worth a lot there; flat means the course is near its ceiling. Hover or tap a line for exact values.</div>
++      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 10px">
++        <span style="font-size:12px;color:var(--text3);margin-right:2px">Zoom</span>
++        <button class="zoom-btn active" data-z="0" onclick="setHscZoom(0,this)">All</button>
++        <button class="zoom-btn" data-z="1" onclick="setHscZoom(1,this)">80+</button>
++        <button class="zoom-btn" data-z="2" onclick="setHscZoom(2,this)">90+</button>
++        <button class="zoom-btn" data-z="3" onclick="setHscZoom(3,this)">95+</button>
++        <button class="zoom-btn" data-z="4" onclick="setHscZoom(4,this)">98+</button>
++      </div>
++      <div id="hscLegend" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px"></div>
++      <div id="hscCurve" style="position:relative"></div>
++      <div id="hscFloorBox" style="margin-top:12px"></div>
++    </div>
++
++    <div class="card">
++      <div class="card-title">How this differs from the ATAR tab</div>
++      <div class="how-grid">
++        <div class="how-box">
++          <div class="how-box-title">Two roads, same destination</div>
++          <p>The <strong>ATAR tab</strong> starts from your <strong>KAM</strong> — Knox's estimate of your <em>scaled mark</em> (/50), which is UAC's own currency. This tab starts from your <strong>HSC mark</strong> (/100), which is NESA's. Both descend from the same hidden raw mark, but neither converts into the other.</p>
++        </div>
++        <div class="how-box">
++          <div class="how-box-title">Why they can disagree</div>
++          <p>NESA rounds HSC marks to whole numbers and aligns them to bands, so a reported 90 covers a range of underlying raw marks that scale differently. UAC states plainly that there is <strong>no unique scaled mark for an HSC mark</strong>. The KAM route is generally the tighter of the two; treat this tab as the sanity check.</p>
++        </div>
++        <div class="how-box">
++          <div class="how-box-title">Read the numbers the right way</div>
++          <p>A course where a Band 6 is worth more is a course where a Band 6 is <strong>harder to earn</strong> — the alignment set a demanding standard. It does not mean the course scales generously. Never pick a subject off this table.</p>
++        </div>
++      </div>
++    </div>
++  </div>
++
+   <!-- ══ TIMELINE ══ -->
+   <div id="tab-timeline" class="tab-content" role="tabpanel">
+     <div class="notice green"><span>Dates</span><span>Official Knox 2026 term dates plus key Year 12 milestones. All dates confirmed from the Knox website and NESA.</span></div>
+     <div class="cd-pair">
+-      <div class="cd-widget">
+-        <div class="cd-label">Countdown to</div>
+-        <div class="cd-title">Trial Exams</div>
+-        <div class="cd-blocks" id="cdTrials"></div>
+-        <div class="cd-prog-track"><div class="cd-prog-fill" id="cdTrialsFill" style="width:0%"></div></div>
+-      </div>
+       <div class="cd-widget">
+         <div class="cd-label">Countdown to</div>
+         <div class="cd-title">HSC Exams</div>
+@@ -1214,13 +1281,333 @@ function renderResults(res){
+   }
+ }
+ 
++
++// ══════════════════════════════════════════
++// HSC MARK → ATAR CONTRIBUTION
++// ══════════════════════════════════════════
++// HSC_RUNGS: ATAR-contribution levels, descending.
++// HSC_H[subject][i] = the LOWEST HSC mark reaching HSC_RUNGS[i] in that course.
++// null = that contribution is unreachable through the course.
++// Source: Graham Wright's "What Does It Take" tables. Estimates, not official.
++const HSC_RUNGS = [99.95,99.5,99.0,98.5,98.0,97.5,97.0,96.0,95.0,94.0,93.0,92.0,91.0,90.0,89.0,88.0,87.0,86.0,85.0,84.0,83.0,82.0,81.0,80.0,79.0,78.0,77.0,76.0,75.0,74.0,73.0,72.0,71.0,70.0,69.0,68.0,67.0,66.0,65.0,64.0,63.0,62.0,61.0,60.0,59.0,58.0,57.0,56.0,55.0,54.0,53.0,52.0,51.0,50.0];
++const HSC_H = {"Agriculture":[null,98,97,96,95,95,94,93,92,92,91,90,90,89,88,88,87,86,86,85,84,84,83,83,82,82,81,80,80,80,79,79,78,78,77,77,76,76,76,75,75,74,74,73,73,73,72,72,71,71,70,70,70,69],"Ancient History":[98,96,95,95,94,94,93,92,92,91,90,90,89,89,88,87,87,86,86,85,85,84,84,83,83,82,81,81,80,80,79,79,78,78,77,77,76,76,75,75,74,74,73,72,72,71,71,70,70,69,68,68,67,67],"Biology":[96,94,93,93,92,91,91,90,89,88,87,86,85,84,84,83,82,81,80,80,79,78,78,77,76,76,75,75,74,73,73,72,71,71,70,70,69,68,68,67,67,66,65,65,64,64,63,63,62,61,59,58,56,55],"Business Studies":[99,97,96,95,94,94,94,93,92,91,91,90,89,89,88,87,87,86,85,85,84,83,83,82,82,81,81,80,80,79,79,78,78,77,77,76,76,75,75,74,74,74,73,73,72,72,71,71,70,70,69,69,68,68],"Chemistry":[97,94,92,91,89,89,88,86,84,83,82,81,80,79,78,77,77,76,75,74,74,73,72,72,71,71,70,70,69,69,68,67,67,66,66,65,64,62,61,60,58,57,56,55,54,52,51,50,49,47,46,45,44,42],"Chinese Continuers":[97,96,95,95,94,94,94,93,92,92,91,90,90,89,89,88,88,87,86,86,85,84,84,83,83,82,82,81,80,79,77,76,75,73,72,70,69,67,66,65,63,62,61,59,58,57,55,54,53,51,50,49,47,46],"Chinese Extension":[50,49,48,48,47,47,47,46,46,46,46,45,45,45,44,44,44,43,43,42,41,41,40,39,39,38,37,37,36,35,35,34,33,33,32,32,31,30,30,29,29,28,27,27,26,26,25,24,24,23,23,22,21,21],"Chinese in Context":[98,98,97,97,96,96,96,95,95,95,95,94,94,94,93,93,93,93,92,92,92,92,91,91,90,90,90,89,89,88,88,88,87,87,86,86,86,84,82,80,79,77,75,74,72,70,69,67,65,64,62,61,59,57],"Design & Technology":[99,97,96,96,95,95,95,94,93,93,93,92,92,91,91,90,90,89,88,88,88,87,87,86,86,85,85,85,84,84,83,83,83,82,82,82,81,81,80,80,80,79,79,78,78,78,77,77,76,76,75,75,74,74],"Drama":[99,98,97,97,96,96,95,95,94,94,93,93,92,92,91,91,90,90,89,89,89,88,88,88,87,87,87,86,86,86,85,85,84,84,84,83,83,83,82,82,82,81,81,80,80,79,79,78,78,77,77,76,76,76],"Earth & Environmental Sci.":[null,96,95,94,93,93,92,92,91,90,89,89,88,88,87,87,86,86,85,85,84,84,83,83,82,82,82,81,81,80,80,79,79,79,78,78,77,77,76,76,76,75,75,74,74,73,73,72,72,71,71,70,70,69],"Economics":[97,95,94,93,92,91,91,90,88,87,86,86,85,84,83,83,82,81,81,80,79,79,78,78,77,76,76,75,75,74,73,73,72,72,71,71,69,68,66,65,64,62,61,60,58,57,56,54,53,52,50,49,48,46],"Engineering Studies":[97,96,95,94,94,93,93,92,91,90,90,89,88,87,86,85,85,84,83,82,82,81,80,80,79,79,78,77,77,76,76,75,74,74,73,73,72,72,71,70,70,69,69,68,68,67,66,66,65,63,62,60,58,57],"English Advanced":[97,95,94,93,93,92,92,91,90,89,88,87,87,86,86,85,85,85,84,84,83,83,82,82,81,81,81,80,79,79,79,78,78,78,77,77,76,76,75,75,74,74,73,73,72,72,71,71,70,70,69,68,68,67],"English EAL/D":[97,94,93,92,92,91,91,90,89,88,87,86,86,85,84,84,83,83,82,82,81,81,80,80,79,79,78,78,77,77,76,76,75,75,74,74,74,73,73,72,72,71,71,71,70,70,69,69,68,68,67,67,66,66],"English Extension 1":[50,49,48,48,47,47,47,47,46,46,45,44,44,43,43,42,42,41,41,40,40,40,39,38,38,37,36,36,35,34,34,33,33,32,31,31,30,29,29,28,28,27,27,26,25,25,24,24,23,23,22,21,21,20],"English Extension 2":[49,48,48,47,47,47,46,46,45,44,44,43,42,42,41,41,40,40,39,39,39,38,38,37,37,36,35,35,34,34,33,32,32,31,30,30,29,29,28,28,27,26,26,25,25,24,24,23,22,22,21,21,20,20],"English Standard":[97,95,94,93,93,92,92,91,90,89,88,87,87,86,86,85,85,85,84,84,83,83,82,82,81,81,81,80,79,79,79,78,78,78,77,77,76,76,75,75,74,74,73,73,72,72,71,71,70,70,69,68,68,67],"French Continuers":[97,96,95,94,93,93,92,91,90,89,88,87,86,85,84,83,83,82,81,81,80,79,79,78,77,77,76,76,74,73,72,70,69,68,66,65,64,62,61,60,59,57,56,55,54,52,51,50,49,47,46,45,44,43],"Geography":[97,96,95,94,94,93,93,92,91,91,90,89,89,88,88,87,86,86,85,85,84,84,83,83,82,82,81,80,80,79,79,78,78,77,77,77,76,76,75,75,74,74,73,73,72,72,72,71,71,70,70,69,67,65],"German Continuers":[98,96,95,94,93,93,92,91,90,89,88,87,86,85,84,83,82,81,80,80,79,78,78,77,76,76,75,73,72,71,69,68,67,66,64,63,62,61,59,58,57,56,54,53,52,51,50,48,47,46,45,44,43,41],"History Extension":[49,48,48,48,48,48,47,47,46,46,46,45,45,44,43,43,42,42,41,41,40,40,40,39,39,38,38,37,37,36,35,35,34,33,33,32,31,31,30,30,29,28,28,27,27,26,25,25,24,24,23,22,22,21],"Industrial Technology":[null,null,null,null,null,null,null,99,97,96,95,94,94,93,92,91,91,90,89,89,88,88,87,86,85,85,84,83,83,82,81,81,80,79,79,78,78,77,77,76,76,75,75,75,74,74,73,73,72,72,72,71,71,70],"Information Processes & Tech.":[96,95,94,93,93,92,92,91,90,89,89,88,88,87,86,86,85,85,84,83,83,82,82,81,80,80,80,79,79,79,78,78,78,77,77,77,76,76,76,75,75,75,74,74,73,72,72,71,71,70,70,69,69,68],"Investigating Science":[null,null,96,95,95,94,94,93,92,91,91,90,89,89,88,88,87,87,86,86,85,85,84,84,83,83,82,82,81,81,80,80,79,79,79,78,78,77,77,77,76,76,75,75,75,74,74,74,73,73,72,72,71,71],"Japanese Beginners":[null,96,95,94,93,93,93,92,91,90,90,89,88,87,87,86,85,85,84,83,83,82,81,81,80,80,79,79,78,78,77,76,76,75,75,74,74,73,73,72,71,71,70,69,69,68,67,67,66,65,65,64,64,63],"Japanese Continuers":[97,96,95,94,94,93,93,92,91,90,90,89,88,88,87,86,86,85,84,84,83,83,82,81,80,80,79,78,78,77,76,75,75,74,73,73,71,70,68,67,66,64,63,61,60,59,57,56,54,53,52,50,49,48],"Japanese Extension":[49,49,48,48,48,48,48,47,46,46,45,45,44,43,42,41,40,39,39,38,37,37,36,35,35,34,34,33,33,32,31,31,30,30,29,29,28,27,27,26,26,25,25,24,24,23,23,22,21,21,20,20,19,19],"Legal Studies":[98,97,96,96,95,94,94,93,92,92,91,90,90,89,88,88,87,86,86,85,84,84,83,83,82,82,81,80,80,79,79,78,78,77,77,76,75,75,74,74,73,72,72,71,71,70,70,69,68,68,67,67,66,66],"Mathematics Advanced":[99,97,96,95,94,94,93,92,91,90,89,88,87,86,85,84,83,83,82,81,80,79,78,78,77,77,76,75,75,74,73,73,72,72,71,70,69,68,66,65,63,62,61,59,58,57,55,54,53,51,50,49,47,46],"Mathematics Extension 1":[48,47,46,44,43,43,42,41,39,38,38,37,36,35,34,34,33,32,32,31,31,30,30,29,29,28,28,27,27,26,26,25,25,25,24,24,23,23,22,22,21,21,20,20,20,19,19,18,18,17,17,16,16,16],"Mathematics Extension 2":[94,88,84,82,79,77,76,74,73,71,70,69,67,66,65,64,63,62,61,60,59,58,57,56,55,54,53,52,51,50,49,49,48,47,46,45,44,43,42,41,41,40,39,38,37,36,35,35,34,33,32,31,30,29],"Mathematics Standard 1":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,98,96,94,94,93,92,92,91,90,90,89,89,88,88,87,86,86,86,85,85,84,84,83,83,83,82,82,81,81,81,80,80,79,79,78,78],"Mathematics Standard 2":[null,100,99,98,98,97,96,95,94,93,92,91,90,89,88,88,87,86,86,85,84,84,83,82,82,81,81,80,79,79,78,78,77,77,76,75,75,74,74,73,73,72,71,71,70,70,69,69,68,68,67,67,66,65],"Modern History":[97,95,94,94,93,93,92,91,90,90,89,88,88,87,86,86,85,84,84,83,83,82,81,81,80,80,79,79,78,77,77,76,76,75,75,74,74,73,73,72,72,72,71,71,70,70,69,69,68,68,68,66,64,62],"Music 1":[null,100,99,98,98,97,97,96,96,96,95,95,94,94,94,93,93,93,92,92,92,91,91,91,90,90,90,89,89,89,88,88,88,87,87,87,87,86,86,86,85,85,85,85,84,84,83,83,82,82,82,81,81,80],"Music 2":[98,97,96,96,95,94,94,93,92,91,91,90,89,89,88,88,87,87,87,86,86,86,85,85,85,84,84,84,82,81,79,78,77,75,74,72,71,69,68,66,65,64,62,61,60,58,57,55,54,53,51,50,49,47],"Music Extension":[50,50,50,50,49,49,49,49,48,48,48,48,48,47,47,47,47,47,46,46,46,46,46,46,45,45,44,43,42,42,41,40,39,39,38,37,36,36,35,34,33,33,32,31,31,30,29,29,28,27,26,26,25,24],"Physics":[98,95,94,93,92,91,90,89,87,86,85,84,83,82,82,81,80,79,78,78,77,76,76,75,74,74,73,73,72,71,71,70,70,69,69,68,67,67,66,65,63,62,61,59,58,57,55,54,53,51,50,49,47,46],"Science Extension":[48,47,46,46,45,45,44,44,43,42,42,41,41,40,40,39,39,39,38,38,37,37,37,36,36,35,35,34,34,33,32,32,31,31,30,30,29,28,28,27,27,26,26,25,24,24,23,23,22,22,21,21,20,19],"Software Design & Dev. (2023/24)":[98,97,96,95,94,94,93,93,91,90,89,88,87,86,86,85,84,84,83,82,82,81,81,80,80,79,79,78,78,77,76,76,75,75,74,74,73,73,72,72,71,71,70,70,69,69,69,68,68,66,64,63,61,59],"Studies of Religion I":[99,97,96,96,95,94,94,93,92,91,90,89,88,88,87,86,86,85,84,84,83,83,82,82,81,81,80,80,79,79,78,78,77,77,76,75,75,74,74,73,73,72,72,71,70,69,67,65,64,62,61,59,57,56],"Studies of Religion II":[98,96,95,94,93,93,93,92,91,90,89,89,88,87,87,86,85,85,84,84,83,83,83,82,82,81,81,80,80,80,79,79,78,78,77,77,76,76,75,75,74,74,73,73,72,72,72,70,68,66,65,63,61,59],"Visual Arts":[98,97,96,96,95,95,95,94,93,93,92,92,91,91,91,91,90,90,90,90,89,89,89,89,88,88,88,88,87,87,87,87,86,86,86,85,85,85,85,84,84,84,84,83,83,83,82,82,82,81,81,80,80,80]};
++const HSC_MAX = {"Agriculture":100,"Ancient History":100,"Biology":100,"Business Studies":100,"Chemistry":100,"Chinese Continuers":100,"Chinese Extension":50,"Chinese in Context":100,"Design & Technology":100,"Drama":100,"Earth & Environmental Sci.":100,"Economics":100,"Engineering Studies":100,"English Advanced":100,"English EAL/D":100,"English Extension 1":50,"English Extension 2":50,"English Standard":100,"French Continuers":100,"Geography":100,"German Continuers":100,"History Extension":50,"Industrial Technology":100,"Information Processes & Tech.":100,"Investigating Science":100,"Japanese Beginners":100,"Japanese Continuers":100,"Japanese Extension":50,"Legal Studies":100,"Mathematics Advanced":100,"Mathematics Extension 1":50,"Mathematics Extension 2":100,"Mathematics Standard 1":100,"Mathematics Standard 2":100,"Modern History":100,"Music 1":100,"Music 2":100,"Music Extension":50,"Physics":100,"Science Extension":50,"Software Design & Dev. (2023/24)":100,"Studies of Religion I":100,"Studies of Religion II":100,"Visual Arts":100};
++let hscMarks = {};
++
++function loadHscMarks(){ try{ hscMarks = JSON.parse(localStorage.getItem('knox26_hsc')||'{}'); }catch(e){ hscMarks={}; } }
++function persistHscMarks(){ try{ localStorage.setItem('knox26_hsc',JSON.stringify(hscMarks)); }catch(e){} }
++function clearHscMarks(){ hscMarks={}; persistHscMarks(); renderHscTab(); renderHscCurve(); }
++function hscCourseMax(name){ return HSC_MAX[name] || 100; }
++function hscBandFloor(name){ return hscCourseMax(name)===50 ? 45 : 90; }
++
++function hscContribution(name, mark){
++  const h = HSC_H[name];
++  if(!h || mark===null || mark===undefined || mark==='' || isNaN(mark)) return null;
++  let i=-1;
++  for(let k=0;k<h.length;k++){ if(h[k]!==null && h[k]<=mark){ i=k; break; } }
++  if(i===-1) return {v:HSC_RUNGS[HSC_RUNGS.length-1], cap:'below'};
++  let p=-1;
++  for(let k=i-1;k>=0;k--){ if(h[k]!==null){ p=k; break; } }
++  if(p===-1) return {v:HSC_RUNGS[i], cap:'above'};
++  const span=h[p]-h[i];
++  const f = span>0 ? Math.min(1,(mark-h[i])/span) : 0;
++  return {v: HSC_RUNGS[i] + f*(HSC_RUNGS[p]-HSC_RUNGS[i]), cap:null};
++}
++
++function hscMarkNeeded(name, target){
++  const h = HSC_H[name];
++  if(!h || isNaN(target)) return null;
++  let best=null;
++  for(let k=0;k<HSC_RUNGS.length;k++){ if(HSC_RUNGS[k] >= target && h[k]!==null) best = h[k]; }
++  return best;
++}
++
++function hscSubjectNames(){
++  const src = (typeof atarSubjects!=='undefined' && atarSubjects.length) ? atarSubjects
++            : (typeof addedSubjects!=='undefined' ? addedSubjects : []);
++  return [...new Set(src.map(x=>x.sName).filter(Boolean))];
++}
++
++function hscBestTen(rows){
++  const withC = rows.filter(r=>r.con && r.units>0);
++  const eng = withC.filter(r=>/^English (Advanced|Standard|Studies|EAL)/.test(r.name)).sort((a,b)=>b.con.v-a.con.v);
++  const take=[]; let units=0;
++  if(eng.length){ const e=eng[0]; const u=Math.min(2,e.units); take.push({...e,counted:u}); units+=u; }
++  withC.filter(r=>!take.some(t=>t.name===r.name)).sort((a,b)=>b.con.v-a.con.v)
++       .forEach(r=>{ if(units>=10) return; const u=Math.min(r.units,10-units); take.push({...r,counted:u}); units+=u; });
++  const tot = take.reduce((a,r)=>a+r.con.v*r.counted,0);
++  return {take, units, est: units? tot/units : null};
++}
++
++// Rebuilding the table on every keystroke destroys the input being typed into.
++// Update just this row's contribution cell, then the summary and the curve.
++function setHscMark(name, v){
++  const mx = hscCourseMax(name);
++  if(v==='') delete hscMarks[name];
++  else hscMarks[name] = Math.max(0, Math.min(mx, Number(v)));
++  persistHscMarks();
++  const cell = document.getElementById('hscCon_'+hscKey(name));
++  if(cell){
++    const c = hscContribution(name, hscMarks[name]===undefined?null:hscMarks[name]);
++    cell.innerHTML = c ? (c.cap==='above' ? '&ge;'+c.v.toFixed(2)
++                        : c.cap==='below' ? '&lt;50' : c.v.toFixed(2)) : '—';
++    cell.style.color = c ? (c.v>=97?'var(--green)':c.v>=93?'var(--gold)':'var(--text2)') : 'var(--text3)';
++  }
++  renderHscSummary();
++  renderHscCurve();
++}
++
++// Stable DOM-safe id for a subject name.
++function hscKey(name){ return name.replace(/[^A-Za-z0-9]/g,'_'); }
++
++function renderHscTab(){
++  const tbody = document.getElementById('hscBody'); if(!tbody) return;
++  const names = hscSubjectNames();
++  const target = parseFloat(document.getElementById('hscTarget').value);
++  const th = document.getElementById('hscNeedTh');
++  if(th) th.textContent = isNaN(target) ? 'Mark needed' : 'For ' + String(target);
++
++  if(!names.length){
++    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text3);font-size:13px;padding:18px">Add your subjects in the Band 6 tab and they will appear here.</td></tr>';
++    document.getElementById('hscSummary').innerHTML=''; return;
++  }
++  const rows = names.map(n=>{
++    const units = (typeof getSubjectUnits==='function') ? getSubjectUnits(n, atarSubjects) : 2;
++    const mark = (hscMarks[n]===''||hscMarks[n]===undefined) ? null : Number(hscMarks[n]);
++    return {name:n, units, mark, max:hscCourseMax(n), has:!!HSC_H[n],
++            need: hscMarkNeeded(n,target), con: hscContribution(n,mark)};
++  });
++
++  tbody.innerHTML = rows.map(r=>{
++    if(!r.has) return '<tr><td style="font-weight:600">'+r.name+'</td>'
++      + '<td class="na-cell">'+r.units+'</td><td class="na-cell">—</td>'
++      + '<td class="na-cell" colspan="3">Not in this dataset'
++      + (/Enterprise/.test(r.name)?' · closest relative is Information Processes &amp; Tech.':'') + '</td></tr>';
++    const conStr = r.con ? (r.con.cap==='above' ? '≥'+r.con.v.toFixed(2)
++                        : r.con.cap==='below' ? '&lt;50' : r.con.v.toFixed(2)) : '—';
++    const col = r.con ? (r.con.v>=97?'var(--green)':r.con.v>=93?'var(--gold)':'var(--text2)') : 'var(--text3)';
++    const safe = r.name.replace(/'/g, "\\'");
++    return '<tr><td style="font-weight:600;color:var(--text)">'+r.name+'</td>'
++      + '<td style="font-family:\'JetBrains Mono\',monospace;font-size:12px;color:var(--text3)">'+r.units+'</td>'
++      + '<td style="font-family:\'JetBrains Mono\',monospace;font-size:12px;color:var(--text3)">'+r.max+'</td>'
++      + '<td style="font-family:\'JetBrains Mono\',monospace;font-size:13px;font-weight:600;color:var(--blue)">'
++      + (r.need===null?'<span style="color:var(--red)">n/a</span>':r.need)+'</td>'
++      + '<td><input type="number" min="0" max="'+r.max+'" value="'+(r.mark===null?'':r.mark)+'" placeholder="/'+r.max+'"'
++      + ' oninput="setHscMark(\''+safe+'\',this.value)"'
++      + ' style="width:74px;background:var(--bg2);border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-family:\'JetBrains Mono\',monospace;font-size:13px;color:var(--text);outline:none;text-align:right"></td>'
++      + '<td id="hscCon_'+hscKey(r.name)+'" style="font-family:\'JetBrains Mono\',monospace;font-size:13px;font-weight:600;color:'+col+'">'+conStr+'</td></tr>';
++  }).join('');
++
++  renderHscSummary();
++}
++
++// Rebuilds the estimate box only, so typing in a mark field never touches the table.
++function renderHscSummary(){
++  const box = document.getElementById('hscSummary'); if(!box) return;
++  const names = hscSubjectNames();
++  const tEl = document.getElementById('hscTarget');
++  const target = tEl ? parseFloat(tEl.value) : NaN;
++  const rows = names.map(n=>{
++    const units = (typeof getSubjectUnits==='function') ? getSubjectUnits(n, atarSubjects) : 2;
++    const mark = (hscMarks[n]===''||hscMarks[n]===undefined) ? null : Number(hscMarks[n]);
++    return {name:n, units, mark, max:hscCourseMax(n), has:!!HSC_H[n],
++            need: hscMarkNeeded(n,target), con: hscContribution(n,mark)};
++  });
++  const {take,units,est} = hscBestTen(rows);
++  if(est===null){
++    box.innerHTML = '<div class="notice blue" style="margin:0"><span>Tip</span><span>Set a target above to see what each course needs, or type into "Try a mark" to test a scenario.</span></div>';
++    return;
++  }
++  const vals = take.map(t=>t.con.v);
++  let compare = '';
++  if(typeof lastAtarForInsights!=='undefined' && lastAtarForInsights!==null){
++    const d = est - lastAtarForInsights;
++    compare = '<div style="font-size:12.5px;color:var(--text2);margin-top:8px">Your <strong>KAM route</strong> (ATAR tab) currently gives <strong>'
++      + lastAtarForInsights.toFixed(2) + '</strong> — a gap of ' + (d>=0?'+':'') + d.toFixed(2) + '. '
++      + 'Before results come out the KAM route is the better guide, because it starts from your actual rank. '
++      + 'Use this tab to test scenarios, not to predict.</div>';
++  }
++  box.innerHTML = '<div class="notice ' + (est>=target?'green':'amber') + '" style="margin:0"><span>Estimate</span><span>'
++    + '<strong>If you achieved exactly these marks</strong>, your best ' + units + ' units would average a contribution of '
++    + '<strong style="font-size:15px">' + est.toFixed(2) + '</strong> — roughly the ATAR that scenario produces. '
++    + 'Counted courses range ' + Math.min.apply(null,vals).toFixed(2) + '–' + Math.max.apply(null,vals).toFixed(2) + '.'
++    + (units<10 ? '<br><em>Only ' + units + ' units entered — an ATAR needs 10.</em>' : '')
++    + compare + '</span></div>';
++}
++
++const HSC_ZOOMS=[[50,'All'],[80,'80+'],[90,'90+'],[95,'95+'],[98,'98+']];
++const HSC_COLORS=['#2f6fd0','#c0392b','#157f4f','#b0761c','#7a3ea8','#0e7c8a','#8a5a2e','#a82e7e'];
++let hscZoom=0, hscHover=null;
++
++function setHscZoom(z,btn){
++  hscZoom=z;
++  document.querySelectorAll('#tab-hsc .zoom-btn').forEach(b=>b.classList.remove('active'));
++  if(btn) btn.classList.add('active');
++  renderHscCurve();
++}
++
++function hscPlotted(){
++  const mine=hscSubjectNames().filter(n=>HSC_H[n]);
++  return mine.length?mine:['English Advanced','Mathematics Standard 2','Business Studies','Chemistry','Mathematics Extension 1'].filter(n=>HSC_H[n]);
++}
++
++function renderHscCurve(){
++  const host=document.getElementById('hscCurve'); if(!host) return;
++  const subs=hscPlotted();
++  if(!subs.length){ host.innerHTML='<p style="color:var(--text3);font-size:13px">Add subjects in the Band 6 tab to plot them.</p>';
++    document.getElementById('hscLegend').innerHTML=''; document.getElementById('hscFloorBox').innerHTML=''; return; }
++
++  const yMin=HSC_ZOOMS[hscZoom][0], yMax=100;
++  // x axis: percentage of each course maximum, so /50 and /100 courses share one scale
++  let x0=100,x1=0;
++  const series=subs.map((n,si)=>{
++    const h=HSC_H[n], mx=hscCourseMax(n), pts=[];
++    for(let i=0;i<h.length;i++){
++      if(h[i]===null) continue;
++      const c=HSC_RUNGS[i];
++      if(c<yMin-0.01) continue;
++      const px=h[i]/mx*100;
++      pts.push({px, mark:h[i], con:c});
++      if(px<x0)x0=px; if(px>x1)x1=px;
++    }
++    return {name:n, mx, colour:HSC_COLORS[si%HSC_COLORS.length], pts};
++  }).filter(s=>s.pts.length>1);
++
++  if(!series.length){ host.innerHTML='<p style="color:var(--text3);font-size:13px">No data in this zoom range.</p>'; return; }
++  x0=Math.max(0,Math.floor(x0/5)*5); x1=Math.min(100,Math.ceil(x1/5)*5);
++  if(x1-x0<10) x1=Math.min(100,x0+10);
++
++  const W=640,H=330,Pl=46,Pr=16,Pt=16,Pb=42;
++  const X=v=>Pl+(v-x0)/(x1-x0)*(W-Pl-Pr);
++  const Y=v=>Pt+(1-(v-yMin)/(yMax-yMin))*(H-Pt-Pb);
++
++  let g='';
++  const yStep=(yMax-yMin)<=5?1:(yMax-yMin)<=10?2:(yMax-yMin)<=20?5:10;
++  for(let v=Math.ceil(yMin); v<=yMax; v+=yStep){
++    g+='<line x1="'+Pl+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-Pr)+'" y2="'+Y(v).toFixed(1)+'" stroke="var(--border)"/>'
++     + '<text x="'+(Pl-7)+'" y="'+(Y(v)+4).toFixed(1)+'" font-size="10" text-anchor="end" fill="var(--text3)" font-family="JetBrains Mono,monospace">'+v+'</text>';
++  }
++  for(let v=x0; v<=x1; v+=(x1-x0<=20?5:10)){
++    g+='<line x1="'+X(v).toFixed(1)+'" y1="'+Pt+'" x2="'+X(v).toFixed(1)+'" y2="'+(H-Pb)+'" stroke="var(--border)" stroke-dasharray="2 4"/>'
++     + '<text x="'+X(v).toFixed(1)+'" y="'+(H-Pb+16)+'" font-size="10" text-anchor="middle" fill="var(--text3)" font-family="JetBrains Mono,monospace">'+v+'%</text>';
++  }
++  // Band 6 floor = 90% of the course maximum for every course
++  let floorLine='';
++  if(90>=x0 && 90<=x1){
++    floorLine='<line x1="'+X(90).toFixed(1)+'" y1="'+Pt+'" x2="'+X(90).toFixed(1)+'" y2="'+(H-Pb)+'" stroke="var(--gold2)" stroke-width="1.5" stroke-dasharray="5 4"/>'
++      + '<text x="'+(X(90)+5).toFixed(1)+'" y="'+(Pt+12)+'" font-size="10" fill="var(--gold)" font-family="JetBrains Mono,monospace">Band 6 floor</text>';
++  }
++  let paths='',dots='';
++  series.forEach(sr=>{
++    const d=sr.pts.map((p,i)=>(i?'L':'M')+X(p.px).toFixed(1)+' '+Y(p.con).toFixed(1)).join(' ');
++    const dim=(hscHover && hscHover!==sr.name);
++    paths+='<path d="'+d+'" fill="none" stroke="'+sr.colour+'" stroke-width="'+(hscHover===sr.name?3.2:2.1)+'" stroke-linejoin="round" opacity="'+(dim?0.18:1)+'"/>';
++    const fp=sr.pts.find(p=>Math.abs(p.px-90)<0.01);
++    if(fp && 90>=x0 && 90<=x1)
++      dots+='<circle cx="'+X(90).toFixed(1)+'" cy="'+Y(fp.con).toFixed(1)+'" r="4" fill="'+sr.colour+'" stroke="var(--bg)" stroke-width="1.5" opacity="'+(dim?0.18:1)+'"/>';
++    const m=hscMarks[sr.name];
++    if(m!==undefined && m!==''){
++      const c=hscContribution(sr.name,Number(m)), px=Number(m)/sr.mx*100;
++      if(c && c.v>=yMin && px>=x0 && px<=x1)
++        dots+='<circle cx="'+X(px).toFixed(1)+'" cy="'+Y(c.v).toFixed(1)+'" r="5.5" fill="var(--bg)" stroke="'+sr.colour+'" stroke-width="2.6" opacity="'+(dim?0.18:1)+'"/>';
++    }
++  });
++
++  host.innerHTML='<svg id="hscSvg" viewBox="0 0 '+W+' '+H+'" width="100%" role="img" style="touch-action:none"'
++    + ' aria-label="HSC mark as a percentage of the course maximum, against ATAR contribution, for your subjects">'
++    + g + floorLine + paths + dots
++    + '<text x="'+Pl+'" y="'+(H-6)+'" font-size="10.5" fill="var(--text3)" font-family="JetBrains Mono,monospace">HSC mark, % of course max →</text>'
++    + '<g id="hscCross"></g></svg>'
++    + '<div id="hscTip" style="position:absolute;display:none;pointer-events:none;background:var(--bg2);border:1.5px solid var(--border2);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);box-shadow:0 4px 14px rgba(0,0,0,.18);z-index:5;min-width:240px"></div>';
++
++  const svg=document.getElementById('hscSvg'), tip=document.getElementById('hscTip'), cross=document.getElementById('hscCross');
++  function at(evt){
++    const r=svg.getBoundingClientRect();
++    const cx=(evt.touches?evt.touches[0].clientX:evt.clientX)-r.left;
++    const cy=(evt.touches?evt.touches[0].clientY:evt.clientY)-r.top;
++    const vx=cx/r.width*W;
++    if(vx<Pl||vx>W-Pr){ tip.style.display='none'; cross.innerHTML=''; hscHover=null; return; }
++    const pct=x0+(vx-Pl)/(W-Pl-Pr)*(x1-x0);
++    const vy=cy/r.height*H;
++    const conAt=yMin+(1-(vy-Pt)/(H-Pt-Pb))*(yMax-yMin);
++    const rows=series.map(sr=>{
++      const mark=Math.round(pct/100*sr.mx);
++      const c=hscContribution(sr.name,mark);
++      return {name:sr.name,colour:sr.colour,mark,mx:sr.mx,con:c?c.v:null};
++    }).filter(r=>r.con!==null);
++    if(!rows.length){ tip.style.display='none'; return; }
++    let near=rows[0];
++    rows.forEach(r=>{ if(Math.abs(r.con-conAt)<Math.abs(near.con-conAt)) near=r; });
++    hscHover=near.name;
++    cross.innerHTML='<line x1="'+X(pct).toFixed(1)+'" y1="'+Pt+'" x2="'+X(pct).toFixed(1)+'" y2="'+(H-Pb)+'" stroke="var(--text3)" stroke-width="1" stroke-dasharray="3 3"/>';
++    tip.innerHTML='<div style="font-family:JetBrains Mono,monospace;font-size:11px;color:var(--text3);margin-bottom:5px">at '+Math.round(pct)+'% of course max</div>'
++      + rows.sort((a,b)=>b.con-a.con).map(r=>
++        '<div style="display:flex;justify-content:space-between;gap:14px;line-height:1.55;'+(r.name===near.name?'font-weight:700':'opacity:.7')+'">'
++        + '<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px">'
++        + '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+r.colour+';margin-right:6px"></span>'+r.name+'</span>'
++        + '<span style="white-space:nowrap;font-family:JetBrains Mono,monospace">'+r.mark+'/'+r.mx+' &rarr; <strong>'+r.con.toFixed(2)+'</strong></span></div>').join('');
++    tip.style.display='block';
++    const tw=tip.offsetWidth||160;
++    tip.style.left=Math.max(0,Math.min(r.width-tw, cx+14))+'px';
++    tip.style.top=Math.max(0,cy-10)+'px';
++    paths='';
++    renderPaths();
++  }
++  function renderPaths(){
++    svg.querySelectorAll('path').forEach((el,i)=>{
++      const dim=(hscHover && hscHover!==series[i].name);
++      el.setAttribute('opacity',dim?0.18:1);
++      el.setAttribute('stroke-width',hscHover===series[i].name?3.2:2.1);
++    });
++  }
++  svg.addEventListener('mousemove',at);
++  svg.addEventListener('touchmove',at,{passive:true});
++  svg.addEventListener('touchstart',at,{passive:true});
++  svg.addEventListener('mouseleave',()=>{ tip.style.display='none'; cross.innerHTML=''; hscHover=null; renderPaths(); });
++
++  document.getElementById('hscLegend').innerHTML=series.map(sr=>
++    '<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)">'
++    + '<span style="width:14px;height:3px;border-radius:2px;background:'+sr.colour+'"></span>'+sr.name+'</span>').join('');
++
++  const fb=document.getElementById('hscFloorBox');
++  const floors=series.map(sr=>({name:sr.name,mx:sr.mx,floor:hscBandFloor(sr.name),
++      con:hscContribution(sr.name,hscBandFloor(sr.name)),top:hscContribution(sr.name,sr.mx)}))
++    .filter(f=>f.con).sort((a,b)=>b.con.v-a.con.v);
++  fb.innerHTML='<div class="notice amber" style="margin:0"><span>Band 6 floor</span><span>'
++    + 'What the <strong>lowest Band 6</strong> is worth in each of your courses — an HSC mark of exactly 90/100, or 45/50 in one-unit Extension courses. '
++    + 'The whole band is worth more than the floor: the span column shows how much a Band 6 is actually worth from bottom to top.'
++    + '<table style="width:100%;margin-top:10px;font-size:12.5px;border-collapse:collapse">'
++    + '<tr style="color:var(--text3);font-family:JetBrains Mono,monospace;font-size:11px">'
++    + '<td style="padding:3px 0">COURSE</td><td style="text-align:right">FLOOR</td><td style="text-align:right">= ATAR</td><td style="text-align:right">FULL MARKS</td><td style="text-align:right">BAND SPANS</td></tr>'
++    + floors.map(f=>'<tr><td style="padding:3px 0">'+f.name+'</td>'
++        + '<td style="text-align:right;font-family:JetBrains Mono,monospace;color:var(--text3)">'+f.floor+'/'+f.mx+'</td>'
++        + '<td style="text-align:right;font-family:JetBrains Mono,monospace;font-weight:700">'+f.con.v.toFixed(2)+'</td>'
++        + '<td style="text-align:right;font-family:JetBrains Mono,monospace;color:var(--text3)">'+(f.top?f.top.v.toFixed(2):'—')+'</td>'
++        + '<td style="text-align:right;font-family:JetBrains Mono,monospace;color:var(--blue)">'+(f.top?(f.top.v-f.con.v).toFixed(2):'—')+'</td></tr>').join('')
++    + '</table>'
++    + '<div style="margin-top:9px;font-size:12px;color:var(--text2)">A <em>high</em> floor means a Band 6 is <strong>harder to earn</strong> in that course, not that it scales generously. A <em>wide</em> span means marks inside the band still move your ATAR a lot.</div>'
++    + '</span></div>';
++}
++
++// ══════════════════════════════════════════
++// BAND 6 FLOOR -> ATAR CONTRIBUTION
++// The ATAR contribution of the LOWEST Band 6: an HSC mark of exactly 90/100
++// (or exactly 45/50, the E4 floor, in one-unit Extension courses). Not an
++// average Band 6 and not a Band 6 ceiling -- the bottom of the band.
++// A HIGHER number means a Band 6 is HARDER to earn in that course, because
++// the alignment set a demanding standard. It does not mean the course scales
++// generously. Derived from Graham Wright's "What Does It Take" tables.
++// null = course not present in that dataset.
++const B6_ATAR = {"Agriculture":92.0,"Ancient History":93.0,"Biology":96.0,"Business Studies":92.0,"Chemistry":98.25,"Chinese Continuers":92.0,"Chinese Extension":92.0,"Chinese in Context":79.0,"Design & Technology":88.0,"Drama":87.0,"Earth & Environmental Sci.":94.0,"Economics":96.0,"Engineering Studies":94.0,"English Advanced":95.0,"English EAL/D":96.0,"English Extension 1":93.0,"English Extension 2":95.0,"English Standard":95.0,"Enterprise Computing":null,"French Continuers":95.0,"Geography":93.0,"German Continuers":95.0,"German Extension":null,"History Extension":92.0,"Industrial Technology":86.0,"Information Processes & Tech.":95.0,"Investigating Science":92.0,"Japanese Beginners":94.0,"Japanese Continuers":94.0,"Japanese Extension":93.0,"Legal Studies":92.0,"Mathematics Advanced":94.0,"Mathematics Extension 1":98.75,"Mathematics Extension 2":99.65,"Mathematics Standard 1":77.0,"Mathematics Standard 2":91.0,"Modern History":95.0,"Music 1":79.0,"Music 2":92.0,"Music Extension":79.0,"PDHPE":null,"Physics":97.0,"Science Extension":98.0,"Software Design & Dev. (2023/24)":94.0,"Software Engineering":null,"Studies of Religion I":93.0,"Studies of Religion II":94.0,"Visual Arts":87.0};
++function b6AtarFor(name){ const v = B6_ATAR[name]; return (v===undefined||v===null)?null:v; }
++
+ // ══════════════════════════════════════════
+ // INSIGHTS TABLE
+ // ══════════════════════════════════════════
+ let insSortKey='b6Rate', insSortDir=-1, insFilter='';
+ 
+ function renderInsTable(){
+-  const active=activeSubjects();
++  const active=activeSubjects().map(s=>({...s, b6Atar:b6AtarFor(s.name)}));
+   let data=[...active];
+   if(insFilter) data=data.filter(s=>s.name.toLowerCase().includes(insFilter.toLowerCase()));
+   data.sort((a,b)=>{
+@@ -1240,6 +1627,7 @@ function renderInsTable(){
+         <td class="na-cell">—</td>
+         <td class="na-cell">—</td>
+         <td class="na-cell">—</td>
++        <td class="na-cell">—</td>
+       </tr>`;
+     }
+     const bc=s.b6Rate>=.8?'#22c55e':s.b6Rate>=.5?'#84cc16':s.b6Rate>=.3?'#f59e0b':s.b6Rate>=.1?'#fb923c':'#ef4444';
+@@ -1256,14 +1644,17 @@ function renderInsTable(){
+       <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue)">${(s.b5Rate*100).toFixed(1)}%</span></td>
+       <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text3)">${(s.stateB6*100).toFixed(1)}%</span></td>
+       <td>${advStr}</td>
++      <td>${s.b6Atar===null
++        ? `<span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text3)">n/a</span>`
++        : `<span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:${s.b6Atar>=97?'#22c55e':s.b6Atar>=94?'#84cc16':s.b6Atar>=90?'#f59e0b':'#fb923c'}">${s.b6Atar.toFixed(2)}</span>`}</td>
+     </tr>`;
+   }).join('');
+ 
+   // Update sort header indicators
+-  ['name','b6Rate','b5Rate','stateB6','adv'].forEach(k=>{
++  ['name','b6Rate','b5Rate','stateB6','adv','b6Atar'].forEach(k=>{
+     const th=document.getElementById('th-'+k);
+     if(!th) return;
+-    const base={name:'Subject',b6Rate:'Knox B6',b5Rate:'Knox B5+',stateB6:'State B6',adv:'Advantage'}[k];
++    const base={name:'Subject',b6Rate:'Knox B6',b5Rate:'Knox B5+',stateB6:'State B6',adv:'Advantage',b6Atar:'B6 floor → ATAR'}[k];
+     th.textContent=k===insSortKey?base+(insSortDir===-1?' ▾':' ▴'):base;
+     th.className=k===insSortKey?'sorted':'';
+     if(k===insSortKey) th.setAttribute('aria-sort',insSortDir===-1?'descending':'ascending');
+@@ -1468,7 +1859,6 @@ function cdCountdown(toDateStr, blockId, fillId, fromDateStr){
+ }
+ 
+ function renderTimeline(){
+-  cdCountdown('2026-08-14','cdTrials','cdTrialsFill');
+   cdCountdown('2026-10-13','cdHsc','cdHscFill');
+   const now=new Date();
+   const nextMs=MILESTONES.find(m=>new Date(m.date)>now);
+@@ -1643,6 +2033,7 @@ function switchTab(id,btn){
+   btn.classList.add('active');
+   btn.setAttribute('aria-selected','true');
+   if(id === 'atar') onOpenAtarTab();
++  if(id === 'hsc'){ renderHscTab(); renderHscCurve(); }
+ }
+ 
+ // Run a handler on Enter/Space for keyboard users on non-button controls (sort headers, accordion).
+@@ -1951,6 +2342,16 @@ function removeAtarSubj(i){
+   renderAtarSubjectsList();
+   autoCalculateATAR();
+ }
++// Re-sorting the list while a KAM field is focused yanks the row out from under
++// the cursor. Only re-sort once focus has actually left the KAM fields.
++function onKamBlur(){
++  setTimeout(()=>{
++    const ae = document.activeElement;
++    if(ae && ae.classList && ae.classList.contains('kam-input')) return;
++    renderAtarSubjectsList();
++  }, 0);
++}
++
+ function updateAtarKam(i, v){
+   const kam = parseKamValue(v);
+   atarSubjects[i].kam = kam !== null ? String(kam) : '';
+@@ -2035,7 +2436,7 @@ function renderAtarSubjectsList(){
+       <div class="kam-fields">
+         <label>KAM</label>
+         <input class="kam-input" type="number" min="0" max="50" step="1" placeholder="—" value="${a.kam}"
+-          oninput="updateAtarKam(${i}, this.value)" onchange="renderAtarSubjectsList()">
++          oninput="updateAtarKam(${i}, this.value)" onblur="onKamBlur()">
+         <span class="slash">/50</span>
+       </div>
+       <button class="rm-btn" onclick="removeAtarSubj(${i})">×</button>
+@@ -2813,6 +3214,7 @@ function toggleHowAcc(header){
+ (function(){
+   loadPersisted();
+   loadAtarPersisted();
++  loadHscMarks();
+   migrateAtarSubjectsToBand6();
+   // A shared link (#d=…) overrides saved data, then saves so it sticks for this browser.
+   if(loadFromShare()){ persist(); if(typeof persistAtar==='function') persistAtar(); onYearChange(); }
